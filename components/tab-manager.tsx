@@ -16,17 +16,22 @@ export function TabManager() {
       context.textAlign = 'center';
       context.textBaseline = 'middle';
       context.fillText(emoji, canvas.width / 2, canvas.height / 2);
-      let link = document.querySelector(
-        "link[rel='icon'][data-emoji-favicon='true']",
-      ) as HTMLLinkElement | null;
-      if (!link) {
-        link = document.createElement('link');
+      const url = canvas.toDataURL();
+      const links = Array.from(
+        document.querySelectorAll<HTMLLinkElement>(
+          "link[rel*='icon'], link[rel='apple-touch-icon'], link[rel='mask-icon']",
+        ),
+      );
+      if (links.length === 0) {
+        const link = document.createElement('link');
         link.rel = 'icon';
-        link.type = 'image/png';
-        link.setAttribute('data-emoji-favicon', 'true');
         document.head.appendChild(link);
+        links.push(link);
       }
-      link.href = canvas.toDataURL();
+      links.forEach((link) => {
+        link.type = 'image/png';
+        link.href = url;
+      });
     };
 
     const handleVisibilityChange = () => {
