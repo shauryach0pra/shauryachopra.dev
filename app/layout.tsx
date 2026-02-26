@@ -2,6 +2,7 @@ import React from "react"
 import type { Metadata } from 'next'
 import { Press_Start_2P, VT323 } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { TabManager } from '@/components/tab-manager'
 import './globals.css'
 
 const pressStart = Press_Start_2P({ 
@@ -17,28 +18,11 @@ const vt323 = VT323({
 });
 
 export const metadata: Metadata = {
-  title: 'Shaurya Chopra | AI Engineering & Cyber Security',
+  title: 'Shaurya Chopra',
   description: 'Portfolio of Shaurya Chopra - Exploring AI Engineering & Cyber Security. BTech CS + Cyber Security at Mumbai University.',
   generator: 'v0.app',
   keywords: ['Shaurya Chopra', 'AI Engineering', 'Cyber Security', 'Portfolio', 'Developer'],
   authors: [{ name: 'Shaurya Chopra' }],
-  icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
-  },
 }
 
 export default function RootLayout({
@@ -49,6 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${pressStart.variable} ${vt323.variable} font-sans antialiased`}>
+        <TabManager />
         {children}
         <Analytics />
       </body>
