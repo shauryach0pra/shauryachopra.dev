@@ -5,31 +5,27 @@ import { useEffect } from 'react';
 export function TabManager() {
   useEffect(() => {
     const mainTitle = 'Shaurya Chopra';
-    const setFavicon = (isCrying: boolean) => {
-      const path = isCrying ? '/icon-cry.png' : '/icon.png';
-      const url = `${path}?v=${isCrying ? 'cry' : 'cool'}-${Date.now()}`;
+    const setFavicon = (url: string) => {
+      const href = `${url}?v=${Date.now()}`;
       const head = document.head;
       const existing = document.querySelectorAll<HTMLLinkElement>(
-        "link[rel*='icon'], link[rel='apple-touch-icon'], link[rel='mask-icon']",
+        "link[rel*='icon']",
       );
       existing.forEach((link) => head.removeChild(link));
-      const rels = ['icon', 'shortcut icon', 'apple-touch-icon'];
-      rels.forEach((rel) => {
-        const link = document.createElement('link');
-        link.rel = rel;
-        link.type = 'image/png';
-        link.href = url;
-        head.appendChild(link);
-      });
+      const link = document.createElement('link');
+      link.rel = 'shortcut icon';
+      link.type = 'image/png';
+      link.href = href;
+      head.appendChild(link);
     };
 
     const applyState = (hidden: boolean) => {
       if (hidden) {
         document.title = 'Come Back';
-        setFavicon(true);
+        setFavicon('/icon-cry.png');
       } else {
         document.title = mainTitle;
-        setFavicon(false);
+        setFavicon('/icon.png');
       }
     };
 
