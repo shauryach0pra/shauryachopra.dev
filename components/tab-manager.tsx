@@ -23,8 +23,8 @@ export function TabManager() {
       });
     };
 
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
+    const applyState = (hidden: boolean) => {
+      if (hidden) {
         document.title = 'Come Back';
         setFavicon(true);
       } else {
@@ -33,11 +33,28 @@ export function TabManager() {
       }
     };
 
+    const handleVisibilityChange = () => {
+      const hidden = document.hidden;
+      setTimeout(() => applyState(hidden), 50);
+    };
+
+    const handlePageHide = () => {
+      setTimeout(() => applyState(true), 50);
+    };
+
+    const handlePageShow = () => {
+      setTimeout(() => applyState(false), 50);
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', handlePageHide);
+    window.addEventListener('pageshow', handlePageShow);
     handleVisibilityChange();
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pagehide', handlePageHide);
+      window.removeEventListener('pageshow', handlePageShow);
     };
   }, []);
 
