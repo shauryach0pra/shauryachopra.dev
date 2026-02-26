@@ -7,19 +7,19 @@ export function TabManager() {
     const mainTitle = 'Shaurya Chopra';
     const setFavicon = (isCrying: boolean) => {
       const path = isCrying ? '/icon-cry.png' : '/icon.png';
-      const links = Array.from(
-        document.querySelectorAll<HTMLLinkElement>(
-          "link[rel*='icon'], link[rel='apple-touch-icon'], link[rel='mask-icon']",
-        ),
+      const url = `${path}?v=${isCrying ? 'cry' : 'cool'}-${Date.now()}`;
+      const head = document.head;
+      const existing = document.querySelectorAll<HTMLLinkElement>(
+        "link[rel*='icon'], link[rel='apple-touch-icon'], link[rel='mask-icon']",
       );
-      if (links.length === 0) {
+      existing.forEach((link) => head.removeChild(link));
+      const rels = ['icon', 'shortcut icon', 'apple-touch-icon'];
+      rels.forEach((rel) => {
         const link = document.createElement('link');
-        link.rel = 'icon';
-        document.head.appendChild(link);
-        links.push(link);
-      }
-      links.forEach((link) => {
-        link.href = path;
+        link.rel = rel;
+        link.type = 'image/png';
+        link.href = url;
+        head.appendChild(link);
       });
     };
 
