@@ -6,7 +6,7 @@ export function TabManager() {
   useEffect(() => {
     const mainTitle = 'Shaurya Chopra';
     const setFavicon = (isCrying: boolean) => {
-      const path = isCrying ? '/icon-cry.svg' : '/icon.svg';
+      const path = isCrying ? '/icon-cry.png' : '/icon.png';
       const links = Array.from(
         document.querySelectorAll<HTMLLinkElement>(
           "link[rel*='icon'], link[rel='apple-touch-icon'], link[rel='mask-icon']",
