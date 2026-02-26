@@ -709,7 +709,7 @@ const ICE_CUBE_POSITIONS = [
 
 // Placeholder project data for 5 ice cubes
 const PLACEHOLDER_PROJECTS = [
-  { id: 1, name: "Fakebook", description: "Simulates an OTP grabbing attack using social engineering techniques", techStack: ["Next.js", "Typescript", "Tailwind CSS"], liveDemo: "fakebook.shauryachopra.dev" },
+  { id: 1, name: "Fakebook", description: "Simulates an OTP grabbing attack using social engineering techniques", techStack: ["Next.js", "Typescript", "Tailwind CSS"], liveDemo: "https://fakebook.shauryachopra.dev" },
   { id: 2, name: "Project Beta", description: "An innovative mobile-first platform designed for seamless user experience across all devices.", techStack: ["Next.js", "TypeScript", "Tailwind"], liveDemo: "https://example.com" },
   { id: 3, name: "Project Gamma", description: "A robust backend system handling millions of requests with high availability and fault tolerance.", techStack: ["Python", "FastAPI", "PostgreSQL"], liveDemo: "https://example.com" },
   { id: 4, name: "Project Delta", description: "Machine learning powered analytics dashboard providing actionable insights from complex data.", techStack: ["TensorFlow", "React", "D3.js"], liveDemo: "https://example.com" },
