@@ -34,27 +34,38 @@ export function TabManager() {
     };
 
     const handleVisibilityChange = () => {
-      const hidden = document.hidden;
-      setTimeout(() => applyState(hidden), 50);
+      applyState(document.hidden);
     };
 
     const handlePageHide = () => {
-      setTimeout(() => applyState(true), 50);
+      applyState(true);
     };
 
     const handlePageShow = () => {
-      setTimeout(() => applyState(false), 50);
+      applyState(false);
+    };
+
+    const handleBlur = () => {
+      applyState(true);
+    };
+
+    const handleFocus = () => {
+      applyState(false);
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('pagehide', handlePageHide);
     window.addEventListener('pageshow', handlePageShow);
-    handleVisibilityChange();
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
+    applyState(document.hidden);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('pagehide', handlePageHide);
       window.removeEventListener('pageshow', handlePageShow);
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
     };
   }, []);
 
