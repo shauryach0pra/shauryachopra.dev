@@ -16,14 +16,17 @@ export function TabManager() {
       context.textAlign = 'center';
       context.textBaseline = 'middle';
       context.fillText(emoji, canvas.width / 2, canvas.height / 2);
-      const existing =
-        (document.querySelector("link[rel*='icon']") as HTMLLinkElement) ||
-        document.createElement('link');
-      existing.rel = 'icon';
-      existing.href = canvas.toDataURL();
-      if (!existing.parentNode) {
-        document.head.appendChild(existing);
+      let link = document.querySelector(
+        "link[rel='icon'][data-emoji-favicon='true']",
+      ) as HTMLLinkElement | null;
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        link.type = 'image/png';
+        link.setAttribute('data-emoji-favicon', 'true');
+        document.head.appendChild(link);
       }
+      link.href = canvas.toDataURL();
     };
 
     const handleVisibilityChange = () => {
