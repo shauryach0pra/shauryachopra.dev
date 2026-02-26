@@ -23,6 +23,11 @@ export const metadata: Metadata = {
   generator: 'v0.app',
   keywords: ['Shaurya Chopra', 'AI Engineering', 'Cyber Security', 'Portfolio', 'Developer'],
   authors: [{ name: 'Shaurya Chopra' }],
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
 }
 
 export default function RootLayout({
