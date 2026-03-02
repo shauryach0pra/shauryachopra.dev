@@ -44,14 +44,22 @@ function ResponsiveWrapper({ children }: { children: React.ReactNode }) {
       setScale(newScale)
 
       // Calculate if we need to shift the content to protect the top UI
-      // If the scaled container's top would be off-screen, we shift it down
       const containerHeightOnScreen = BASE_HEIGHT * newScale
       if (containerHeightOnScreen > height) {
-        // Shift it down so the top of the container is at the top of the viewport
-        // The centering flexbox would normally place it at (height - containerHeightOnScreen) / 2
-        // We want its top at 0, so we offset by the absolute value of that negative position
-        const defaultTop = (height - containerHeightOnScreen) / 2
-        setVOffset(-defaultTop / newScale) // Divide by scale because it's applied inside the transform
+        const overflowAtTop = (containerHeightOnScreen - height) / 2
+        const navHeight = 60 * newScale // Approximate height of the top navigation bar
+        
+        // Only shift if the navigation bar would be cut off
+        if (overflowAtTop > 20 * newScale) {
+          // Shift just enough to keep the navigation bar visible with a small margin
+          // Instead of shifting all the way to the top, we keep it more balanced
+          const targetTop = 10 * newScale 
+          const currentTop = -overflowAtTop
+          const shiftNeeded = targetTop - currentTop
+          setVOffset(shiftNeeded / newScale)
+        } else {
+          setVOffset(0)
+        }
       } else {
         setVOffset(0)
       }
@@ -1545,9 +1553,9 @@ function TechnologiesScene({ skills, playClick }: { skills: SkillCategory[], pla
 
         {/* Clouds with shadows and depth - fixed pixel positions */}
         {[
-          { x: 115, y: 54, scale: 1, duration: 22 },
-          { x: 504, y: 54, scale: 0.85, duration: 26 },
-          { x: 936, y: 54, scale: 1.1, duration: 20 }
+          { x: 115, y: 90, scale: 1, duration: 22 },
+          { x: 504, y: 110, scale: 0.85, duration: 26 },
+          { x: 936, y: 100, scale: 1.1, duration: 20 }
         ].map((cloud, i) => (
           <motion.div 
             key={i} 
@@ -1743,7 +1751,7 @@ animate={{ y: [0, -12, 0, 6, 0] }}
       </div>
 
       {/* Easel with Canvas */}
-      <div className="absolute" style={{ top: 174, left: 720, transform: "translateX(-50%)" }}>
+      <div className="absolute" style={{ top: 130, left: 720, transform: "translateX(-50%)" }}>
         {/* Easel legs */}
         <svg className="absolute -bottom-12 left-1/2 -translate-x-1/2" width="300" height="60" viewBox="0 0 300 60">
           <line x1="40" y1="0" x2="15" y2="60" stroke="#8b4513" strokeWidth="10" />
@@ -1795,7 +1803,7 @@ className="border-4 border-[#8b4513]"
       </div>
 
    {/* RECTANGULAR Color Palette - 2 rows x 3 columns */}
-<div className="absolute bottom-14 left-1/2 -translate-x-1/2">
+<div className="absolute bottom-40 left-1/2 -translate-x-1/2">
   <div className="relative">
     {/* Rectangular wooden palette */}
     <svg width="370" height="80" viewBox="0 0 370 80">
