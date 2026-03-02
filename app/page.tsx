@@ -25,30 +25,55 @@ interface Project {
 // Responsive wrapper - scales everything uniformly to fit viewport
 function ResponsiveWrapper({ children }: { children: React.ReactNode }) {
   const [scale, setScale] = useState(1)
+  const [vOffset, setVOffset] = useState(0)
   const BASE_WIDTH = 1440
   const BASE_HEIGHT = 900
   const MIN_SCALE = 0.5
 
   useEffect(() => {
     const updateScale = () => {
-      const scaleX = window.innerWidth / BASE_WIDTH
-      const scaleY = window.innerHeight / BASE_HEIGHT
-      const newScale = Math.max(MIN_SCALE, Math.min(scaleX, scaleY))
+      // Use clientHeight/Width for more stable measurements on Safari
+      const width = document.documentElement.clientWidth
+      const height = document.documentElement.clientHeight
+      const scaleX = width / BASE_WIDTH
+      const scaleY = height / BASE_HEIGHT
+      
+      // Use Math.max instead of Math.min to ensure the content always covers the screen
+      // This eliminates black bars by allowing slight clipping on the edges
+      const newScale = Math.max(MIN_SCALE, Math.max(scaleX, scaleY))
       setScale(newScale)
+
+      // Calculate if we need to shift the content to protect the top UI
+      // If the scaled container's top would be off-screen, we shift it down
+      const containerHeightOnScreen = BASE_HEIGHT * newScale
+      if (containerHeightOnScreen > height) {
+        // Shift it down so the top of the container is at the top of the viewport
+        // The centering flexbox would normally place it at (height - containerHeightOnScreen) / 2
+        // We want its top at 0, so we offset by the absolute value of that negative position
+        const defaultTop = (height - containerHeightOnScreen) / 2
+        setVOffset(-defaultTop / newScale) // Divide by scale because it's applied inside the transform
+      } else {
+        setVOffset(0)
+      }
     }
 
     updateScale()
     window.addEventListener("resize", updateScale)
-    return () => window.removeEventListener("resize", updateScale)
+    // Also listen for orientationchange for mobile Safari
+    window.addEventListener("orientationchange", updateScale)
+    return () => {
+      window.removeEventListener("resize", updateScale)
+      window.removeEventListener("orientationchange", updateScale)
+    }
   }, [])
 
   return (
-    <div className="fixed inset-0 bg-black overflow-hidden flex items-center justify-center">
+    <div className="fixed inset-0 bg-[#2a2520] overflow-hidden flex items-center justify-center">
       <div
         style={{
           width: `${BASE_WIDTH}px`,
           height: `${BASE_HEIGHT}px`,
-          transform: `scale(${scale})`,
+          transform: `scale(${scale}) translateY(${vOffset}px)`,
           transformOrigin: "center center",
           flexShrink: 0,
         }}
