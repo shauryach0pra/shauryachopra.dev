@@ -2366,7 +2366,7 @@ function AboutScene({ aboutData, playClick }: { aboutData: any, playClick: () =>
           />
           
           {/* Content card with hover effects */}
-          <div className="bg-[#2c2c2e] rounded-lg p-4 border border-[#3d3d3f] hover:border-[#4d4d4f] transition-all hover:scale-101 cursor-pointer group">
+          <div className="bg-[#2c2c2e] rounded-lg p-4 border border-[#3d3d3f] hover:border-[#4d4d4f] transition-all cursor-pointer group">
             <div className="flex items-center gap-2 mb-2">
               <span 
                 className="text-base font-semibold px-2 py-0.5 rounded-full bg-[#0a84ff20] text-[#0a84ff] transition-all relative overflow-visible group-hover:shadow-[0_0_20px_rgba(10,132,255,0.6)]"
@@ -2435,7 +2435,7 @@ function AboutScene({ aboutData, playClick }: { aboutData: any, playClick: () =>
       ].map((hobby, i) => (
         <div 
           key={i}
-          className={`bg-gradient-to-br ${hobby.gradient} rounded-xl p-4 border border-[#3d3d3f] hover:border-[#4d4d4f] transition-all hover:scale-103 cursor-pointer relative overflow-hidden group`}
+          className={`bg-gradient-to-br ${hobby.gradient} rounded-xl p-4 border border-[#3d3d3f] hover:border-[#4d4d4f] transition-all cursor-pointer relative overflow-hidden group`}
         >
           {/* Hover glow effect */}
           <div 
@@ -2486,7 +2486,7 @@ function AboutScene({ aboutData, playClick }: { aboutData: any, playClick: () =>
       ].map((goal, i) => (
         <div 
           key={i}
-          className="flex items-center gap-4 p-4 bg-[#2c2c2e] rounded-xl border border-[#3d3d3f] hover:border-[#4d4d4f] transition-all group hover:scale-101 cursor-pointer"
+          className="flex items-center gap-4 p-4 bg-[#2c2c2e] rounded-xl border border-[#3d3d3f] hover:border-[#4d4d4f] transition-all group cursor-pointer"
         >
           {/* Styled number badge with gradient background and circular glow */}
           <div 
