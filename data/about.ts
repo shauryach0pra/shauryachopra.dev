@@ -1,3 +1,5 @@
+// This file contains the data for the About section of the portfolio.
+
 interface AboutData {
   personal: {
     name: string

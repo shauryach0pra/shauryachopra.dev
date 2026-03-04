@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
+// Define the structure for a project
 interface Project {
   id: number
   name: string
@@ -13,43 +14,52 @@ interface Project {
   liveDemo: string
 }
 
+// Define the props for the CoffeeMug component
 interface CoffeeMugProps {
   projects: Project[]
   onProjectSelect: (project: Project) => void
 }
 
+/**
+ * Renders an interactive pixel-art coffee mug.
+ * When clicked, the mug spills and reveals projects as sugar cubes.
+ * @param {CoffeeMugProps} props - The props for the component.
+ * @returns {JSX.Element} The CoffeeMug component.
+ */
 export function CoffeeMug({ projects, onProjectSelect }: CoffeeMugProps) {
+  // State to track if the coffee has been spilled
   const [isSpilled, setIsSpilled] = useState(false)
+  // State to control the visibility of the sugar cubes (projects)
   const [showSugarCubes, setShowSugarCubes] = useState(false)
 
+  // Handle the click event on the mug
   const handleClick = () => {
     if (!isSpilled) {
       setIsSpilled(true)
+      // Show the sugar cubes after a delay to sync with the spill animation
       setTimeout(() => setShowSugarCubes(true), 800)
     }
   }
 
   return (
     <div className="relative">
-      {/* Coffee Mug */}
+      {/* The coffee mug itself */}
       <motion.div
         className="relative cursor-pointer pixel-cursor-pointer"
         onClick={handleClick}
         whileHover={{ scale: 1.05 }}
-        animate={isSpilled ? { rotate: -45 } : { rotate: 0 }}
+        animate={isSpilled ? { rotate: -45 } : { rotate: 0 }} // Animate rotation on spill
         transition={{ type: "spring", stiffness: 200, damping: 20 }}
       >
-        {/* Mug body - pixel art style */}
+        {/* SVG for the pixel-art mug */}
         <svg width="80" height="100" viewBox="0 0 80 100" className="drop-shadow-lg">
-          {/* Mug body */}
           <rect x="10" y="20" width="50" height="60" fill="#f5f2e8" stroke="#2a2520" strokeWidth="3"/>
-          {/* Handle */}
           <path d="M60 30 L70 30 L70 70 L60 70" fill="none" stroke="#2a2520" strokeWidth="3"/>
-          {/* Coffee liquid */}
+          {/* Coffee liquid inside the mug */}
           {!isSpilled && (
             <rect x="13" y="25" width="44" height="30" fill="#4a3728"/>
           )}
-          {/* Steam */}
+          {/* Animated steam */}
           {!isSpilled && (
             <>
               <motion.path
@@ -74,7 +84,7 @@ export function CoffeeMug({ projects, onProjectSelect }: CoffeeMugProps) {
           )}
         </svg>
 
-        {/* Hover text */}
+        {/* Hover hint */}
         {!isSpilled && (
           <motion.p
             initial={{ opacity: 0 }}
@@ -86,7 +96,7 @@ export function CoffeeMug({ projects, onProjectSelect }: CoffeeMugProps) {
         )}
       </motion.div>
 
-      {/* Spilled coffee */}
+      {/* The spilled coffee puddle */}
       <AnimatePresence>
         {isSpilled && (
           <motion.div
@@ -94,7 +104,6 @@ export function CoffeeMug({ projects, onProjectSelect }: CoffeeMugProps) {
             animate={{ scale: 1, opacity: 1 }}
             className="absolute top-[60px] left-[-20px] w-[150px] h-[100px]"
           >
-            {/* Coffee puddle */}
             <svg viewBox="0 0 150 100" className="w-full h-full">
               <motion.ellipse
                 cx="75"
@@ -112,7 +121,7 @@ export function CoffeeMug({ projects, onProjectSelect }: CoffeeMugProps) {
         )}
       </AnimatePresence>
 
-      {/* Sugar cubes (projects) */}
+      {/* The sugar cubes, representing projects */}
       <AnimatePresence>
         {showSugarCubes && (
           <div className="absolute top-[80px] left-[-40px] flex flex-wrap gap-4 w-[200px]">
@@ -136,14 +145,14 @@ export function CoffeeMug({ projects, onProjectSelect }: CoffeeMugProps) {
                 onClick={() => onProjectSelect(project)}
                 className="relative cursor-pointer pixel-cursor-pointer"
               >
-                {/* Sugar cube */}
+                {/* The sugar cube itself */}
                 <div className="w-16 h-16 bg-[#f5f2e8] border-2 border-[#2a2520]/30 shadow-[2px_2px_0px_0px_rgba(42,37,32,0.2)] flex items-center justify-center p-1">
                   <span className="text-[6px] font-[var(--font-pixel)] text-[#2a2520] text-center leading-tight break-words">
                     {project.name}
                   </span>
                 </div>
                 
-                {/* Sugar texture */}
+                {/* Subtle texture for the sugar cube */}
                 <div 
                   className="absolute inset-0 opacity-20 pointer-events-none"
                   style={{

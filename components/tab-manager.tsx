@@ -2,9 +2,16 @@
 
 import { useEffect } from 'react';
 
+/**
+ * A component that manages the document title and favicon based on tab visibility.
+ * When the tab is inactive, it changes the title and favicon to encourage the user to return.
+ * @returns {null} This component does not render anything.
+ */
 export function TabManager() {
   useEffect(() => {
     const mainTitle = 'Shaurya Chopra';
+
+    // Function to dynamically set the favicon
     const setFavicon = (url: string) => {
       const href = `${url}?v=${Date.now()}`;
       const head = document.head;
@@ -19,6 +26,7 @@ export function TabManager() {
       head.appendChild(link);
     };
 
+    // Function to apply the appropriate title and favicon based on tab visibility
     const applyState = (hidden: boolean) => {
       if (hidden) {
         document.title = 'Come Back';
@@ -29,6 +37,7 @@ export function TabManager() {
       }
     };
 
+    // Event handlers for tab visibility changes
     const handleVisibilityChange = () => {
       applyState(document.hidden);
     };
@@ -49,6 +58,7 @@ export function TabManager() {
       applyState(false);
     };
 
+    // Add event listeners for tab visibility
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('pagehide', handlePageHide);
     window.addEventListener('pageshow', handlePageShow);
@@ -56,6 +66,7 @@ export function TabManager() {
     window.addEventListener('focus', handleFocus);
     applyState(document.hidden);
 
+    // Clean up event listeners on component unmount
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('pagehide', handlePageHide);

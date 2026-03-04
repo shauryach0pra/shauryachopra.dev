@@ -1,45 +1,48 @@
+/* Import Tailwind CSS and animation library */
 @import 'tailwindcss';
 @import "tw-animate-css";
 
+/* Define a custom variant for dark mode */
 @custom-variant dark (&:is(.dark *));
 
-/* Pixel Art Portfolio Theme - Off-white elegance with professional aesthetics */
+/* 
+  Pixel Art Portfolio Theme
+  This theme uses an off-white, professional color palette inspired by the American Psycho business card scene.
+  Colors are defined using OKLCH for consistent appearance across different displays.
+*/
 :root {
-  /* Off-white/cream backgrounds for American Psycho card aesthetic */
+  /* Base colors for background and text */
   --background: oklch(0.97 0.005 90);
   --foreground: oklch(0.15 0.01 30);
   
-  /* Card styling - elegant cream */
+  /* Card and popover styles */
   --card: oklch(0.96 0.008 85);
   --card-foreground: oklch(0.18 0.01 30);
-  
   --popover: oklch(0.98 0.005 90);
   --popover-foreground: oklch(0.15 0.01 30);
   
-  /* Primary - deep charcoal for text and emphasis */
+  /* Primary and secondary colors for emphasis and accents */
   --primary: oklch(0.20 0.01 30);
   --primary-foreground: oklch(0.96 0.005 90);
-  
-  /* Secondary - warm gray */
   --secondary: oklch(0.92 0.008 80);
   --secondary-foreground: oklch(0.25 0.01 30);
   
-  /* Muted - subtle warm tones */
+  /* Muted and accent colors for subtle highlights */
   --muted: oklch(0.94 0.006 85);
   --muted-foreground: oklch(0.45 0.01 30);
-  
-  /* Accent - warm cream highlight */
   --accent: oklch(0.93 0.015 75);
   --accent-foreground: oklch(0.20 0.01 30);
   
+  /* Destructive action colors */
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.98 0 0);
   
+  /* Border, input, and ring colors */
   --border: oklch(0.88 0.01 80);
   --input: oklch(0.90 0.008 85);
   --ring: oklch(0.60 0.02 70);
   
-  /* VIBGYOR colors for skills painting */
+  /* VIBGYOR color palette for the skills painting scene */
   --color-violet: oklch(0.55 0.25 290);
   --color-indigo: oklch(0.50 0.25 270);
   --color-blue: oklch(0.55 0.22 250);
@@ -48,11 +51,11 @@
   --color-orange: oklch(0.70 0.20 50);
   --color-red: oklch(0.60 0.25 25);
   
-  /* Table/wood tones for desk scene */
+  /* Wood tones for the desk scene */
   --table: oklch(0.45 0.08 55);
   --table-light: oklch(0.55 0.08 55);
   
-  /* Scene backgrounds */
+  /* Scene-specific background colors */
   --wall: oklch(0.25 0.02 45);
   --wall-dark: oklch(0.18 0.03 260);
   --grass: oklch(0.45 0.15 145);
@@ -60,18 +63,18 @@
   --sky-blue: oklch(0.70 0.12 230);
   --ocean: oklch(0.55 0.15 230);
   
-  /* UI Components */
+  /* UI component colors */
   --button: oklch(0.95 0.005 90);
   --button-hover: oklch(0.90 0.005 90);
   --button-border: oklch(0.80 0.005 90);
   --button-text: oklch(0.15 0.01 30);
   
-  /* Modal/Dialog */
+  /* Modal dialog colors */
   --modal: oklch(0.95 0.005 90);
   --modal-header: oklch(0.15 0.01 30);
   --modal-border: oklch(0.85 0.005 90);
   
-  /* Browser window (macOS style) */
+  /* macOS-style browser window colors */
   --browser-bg: oklch(0.18 0.005 260);
   --browser-toolbar: oklch(0.22 0.005 260);
   --browser-border: oklch(0.28 0.005 260);
@@ -80,22 +83,25 @@
   --browser-minimize: oklch(0.78 0.18 85);
   --browser-maximize: oklch(0.60 0.20 145);
   
-  /* Links */
+  /* Link colors */
   --link: oklch(0.55 0.20 250);
   --link-hover: oklch(0.45 0.22 250);
   
-  /* Skills painting frame */
+  /* Frame colors for the skills painting scene */
   --frame: oklch(0.45 0.12 55);
   --frame-inner: oklch(0.38 0.10 55);
   
+  /* Chart colors */
   --chart-1: oklch(0.55 0.25 290);
   --chart-2: oklch(0.65 0.20 145);
   --chart-3: oklch(0.55 0.22 250);
   --chart-4: oklch(0.85 0.18 90);
   --chart-5: oklch(0.70 0.20 50);
   
+  /* Border radius */
   --radius: 0.625rem;
   
+  /* Sidebar colors */
   --sidebar: oklch(0.96 0.005 90);
   --sidebar-foreground: oklch(0.15 0.01 30);
   --sidebar-primary: oklch(0.20 0.01 30);
@@ -106,6 +112,7 @@
   --sidebar-ring: oklch(0.60 0.02 70);
 }
  
+/* Dark mode color palette */
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -141,6 +148,7 @@
   --sidebar-ring: oklch(0.439 0 0);
 }
 
+/* Inline theme for applying CSS variables */
 @theme inline {
   --font-sans: 'VT323', 'Geist', 'Geist Fallback';
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
@@ -213,26 +221,29 @@
   --color-frame-inner: var(--frame-inner);
 }
 
+/* Base layer styles */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   html, body {
     @apply bg-background text-foreground;
-    image-rendering: pixelated; /* Keep existing custom style */
+    image-rendering: pixelated; /* Ensures a sharp, pixelated look */
     overflow: hidden;
     height: 100%;
   }
 }
 
-/* Pixel art text rendering */
+/* Utility class for pixel-perfect text rendering */
 .pixel-text {
   font-smooth: never;
   -webkit-font-smoothing: none;
   text-rendering: optimizeSpeed;
 }
 
-/* Animation keyframes */
+/* Keyframe animations for various effects */
+
+/* Animation for the business card dropping onto the desk */
 @keyframes card-drop {
   0% {
     transform: translateY(-100vh) rotate(-10deg);
@@ -251,6 +262,7 @@
   }
 }
 
+/* Animation for zooming into the scene */
 @keyframes zoom-in {
   0% {
     transform: scale(1);
@@ -260,6 +272,7 @@
   }
 }
 
+/* Animation for the coffee spilling */
 @keyframes coffee-spill {
   0% {
     transform: rotate(0deg);
@@ -269,6 +282,7 @@
   }
 }
 
+/* Floating animation for elements */
 @keyframes float {
   0%, 100% {
     transform: translateY(0px);
@@ -278,6 +292,7 @@
   }
 }
 
+/* Animation for a paint stroke effect */
 @keyframes paint-stroke {
   0% {
     stroke-dashoffset: 100;
@@ -287,6 +302,7 @@
   }
 }
 
+/* Blinking animation */
 @keyframes blink {
   0%, 90%, 100% {
     opacity: 1;
@@ -296,6 +312,7 @@
   }
 }
 
+/* Typing animation for text */
 @keyframes typing {
   from {
     width: 0;
@@ -305,6 +322,7 @@
   }
 }
 
+/* Animation utility classes */
 .animate-card-drop {
   animation: card-drop 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
@@ -321,10 +339,12 @@
   animation: blink 4s infinite;
 }
 
-/* Scene transitions */
+/* Scene transition styles */
 .scene-transition {
   transition: all 2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Utility to hide scrollbars */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }

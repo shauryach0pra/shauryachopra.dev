@@ -4,6 +4,7 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, ChevronRight } from "lucide-react"
 
+// Define the structure of the data for the About section
 interface AboutData {
   personal: {
     name: string
@@ -28,14 +29,24 @@ interface AboutData {
   }
 }
 
+// Define the props for the AboutSection component
 interface AboutSectionProps {
   aboutData: AboutData
 }
 
+/**
+ * Renders the About section of the portfolio.
+ * This component displays a pixel-art room with a clickable computer that opens a modal with more information.
+ * @param {AboutSectionProps} props - The props for the component.
+ * @returns {JSX.Element} The AboutSection component.
+ */
 export function AboutSection({ aboutData }: AboutSectionProps) {
+  // State to manage the visibility of the browser modal
   const [showBrowser, setShowBrowser] = useState(false)
+  // State to manage the active tab in the browser modal
   const [activeTab, setActiveTab] = useState<"background" | "interests" | "goals">("background")
 
+  // Define the tabs for the browser modal
   const tabs = [
     { id: "background" as const, label: "Background" },
     { id: "interests" as const, label: "Interests" },
@@ -44,16 +55,16 @@ export function AboutSection({ aboutData }: AboutSectionProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f5e6d3] to-[#e8d4b8] p-8 pt-24 relative overflow-hidden">
-      {/* Room background elements */}
+      {/* Room background with wall and floor */}
       <div className="absolute inset-0 overflow-hidden">
-        {/* Wall */}
+        {/* Wall with picture frame and clock */}
         <div className="absolute top-0 left-0 right-0 h-[60%] bg-[#f5e6d3]">
           {/* Picture frame */}
           <div className="absolute w-32 h-24 border-4 border-[#8b4513] bg-[#87ceeb]" style={{ top: 80, left: 144 }}>
             <div className="absolute inset-2 bg-gradient-to-b from-[#87ceeb] to-[#98fb98]" />
           </div>
           
-          {/* Clock */}
+          {/* Animated clock */}
           <motion.div
             className="absolute w-16 h-16 rounded-full border-4 border-[#8b4513] bg-[#f5f2e8]"
             style={{ top: 64, right: 216 }}
@@ -73,7 +84,7 @@ export function AboutSection({ aboutData }: AboutSectionProps) {
           </motion.div>
         </div>
         
-        {/* Floor */}
+        {/* Floor with wood texture */}
         <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-[#8b4513]">
           <div 
             className="absolute inset-0 opacity-30"
@@ -85,7 +96,7 @@ export function AboutSection({ aboutData }: AboutSectionProps) {
       </div>
       
       <div className="relative z-10 max-w-4xl mx-auto">
-        {/* Title */}
+        {/* Section title */}
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -93,22 +104,22 @@ export function AboutSection({ aboutData }: AboutSectionProps) {
         >
         </motion.h2>
         
-        {/* Desk setup */}
+        {/* Desk with computer and other items */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           className="relative"
         >
-          {/* Desk */}
+          {/* Desk structure */}
           <div className="relative mx-auto w-full max-w-2xl">
-            {/* Desk top surface */}
+            {/* Desk top */}
             <div className="h-8 bg-[#8b4513] border-2 border-[#6b3510] rounded-t-lg" />
             
-            {/* Items on desk */}
+            {/* Items on the desk */}
             <div className="relative bg-[#a0522d] border-x-2 border-b-2 border-[#6b3510] p-8 flex justify-center items-end gap-8">
               
-              {/* Lamp */}
+              {/* Animated lamp */}
               <div className="absolute left-8 bottom-6">
                 <motion.div
                   animate={{ 
@@ -118,30 +129,23 @@ export function AboutSection({ aboutData }: AboutSectionProps) {
                   className="relative"
                 >
                   <svg width="50" height="80" viewBox="0 0 50 80" style={{ imageRendering: "pixelated" }}>
-                    {/* Lamp shade */}
                     <polygon points="10,0 40,0 45,30 5,30" fill="#ffd700" />
-                    {/* Light glow */}
                     <ellipse cx="25" cy="30" rx="15" ry="5" fill="#fff8dc" opacity="0.5" />
-                    {/* Lamp stand */}
                     <rect x="22" y="30" width="6" height="35" fill="#2a2520" />
-                    {/* Base */}
                     <ellipse cx="25" cy="70" rx="15" ry="5" fill="#2a2520" />
                   </svg>
                 </motion.div>
               </div>
               
-              {/* Computer/Monitor - clickable */}
+              {/* Clickable computer monitor */}
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 onClick={() => setShowBrowser(true)}
                 className="cursor-pointer pixel-cursor-pointer relative"
               >
                 <svg width="200" height="160" viewBox="0 0 200 160" style={{ imageRendering: "pixelated" }}>
-                  {/* Monitor */}
                   <rect x="10" y="0" width="180" height="120" fill="#2a2520" rx="4" />
-                  {/* Screen */}
                   <rect x="15" y="5" width="170" height="105" fill="#1a365d" />
-                  {/* Screen content - terminal style */}
                   <text x="25" y="30" fill="#22c55e" fontSize="10" fontFamily="monospace">{">"} Hello, I'm Shaurya</text>
                   <text x="25" y="50" fill="#22c55e" fontSize="10" fontFamily="monospace">{">"} Click to learn more</text>
                   <motion.rect
@@ -153,12 +157,11 @@ export function AboutSection({ aboutData }: AboutSectionProps) {
                     animate={{ opacity: [1, 0, 1] }}
                     transition={{ duration: 1, repeat: Infinity }}
                   />
-                  {/* Monitor stand */}
                   <rect x="85" y="120" width="30" height="15" fill="#2a2520" />
                   <rect x="70" y="135" width="60" height="10" fill="#2a2520" />
                 </svg>
                 
-                {/* Hover hint */}
+                {/* Hover hint for the monitor */}
                 <motion.p
                   initial={{ opacity: 0 }}
                   whileHover={{ opacity: 1 }}
@@ -168,13 +171,11 @@ export function AboutSection({ aboutData }: AboutSectionProps) {
                 </motion.p>
               </motion.div>
               
-              {/* Plant */}
+              {/* Animated plant */}
               <div className="absolute right-8 bottom-6">
                 <svg width="50" height="70" viewBox="0 0 50 70" style={{ imageRendering: "pixelated" }}>
-                  {/* Pot */}
                   <polygon points="10,40 40,40 35,70 15,70" fill="#d2691e" />
                   <rect x="8" y="35" width="34" height="8" fill="#d2691e" />
-                  {/* Plant leaves */}
                   <motion.g
                     animate={{ rotate: [-2, 2, -2] }}
                     transition={{ duration: 3, repeat: Infinity }}
@@ -187,7 +188,7 @@ export function AboutSection({ aboutData }: AboutSectionProps) {
                 </svg>
               </div>
               
-              {/* Books */}
+              {/* Stack of books */}
               <div className="absolute right-24 bottom-6">
                 <svg width="40" height="50" viewBox="0 0 40 50" style={{ imageRendering: "pixelated" }}>
                   <rect x="0" y="0" width="12" height="50" fill="#e63946" />
@@ -207,16 +208,11 @@ export function AboutSection({ aboutData }: AboutSectionProps) {
           {/* Chair */}
           <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
             <svg width="100" height="80" viewBox="0 0 100 80" style={{ imageRendering: "pixelated" }}>
-              {/* Seat */}
               <rect x="15" y="30" width="70" height="15" fill="#2a2520" rx="2" />
-              {/* Back */}
               <rect x="20" y="0" width="60" height="35" fill="#2a2520" rx="2" />
-              {/* Armrests */}
               <rect x="5" y="25" width="15" height="8" fill="#2a2520" />
               <rect x="80" y="25" width="15" height="8" fill="#2a2520" />
-              {/* Base */}
               <rect x="40" y="45" width="20" height="20" fill="#1a1a1a" />
-              {/* Wheels */}
               <circle cx="30" cy="75" r="5" fill="#1a1a1a" />
               <circle cx="50" cy="75" r="5" fill="#1a1a1a" />
               <circle cx="70" cy="75" r="5" fill="#1a1a1a" />
@@ -225,11 +221,11 @@ export function AboutSection({ aboutData }: AboutSectionProps) {
         </motion.div>
       </div>
       
-      {/* Browser popup */}
+      {/* Browser modal that appears on computer click */}
       <AnimatePresence>
         {showBrowser && (
           <>
-            {/* Backdrop */}
+            {/* Backdrop overlay */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -247,9 +243,9 @@ export function AboutSection({ aboutData }: AboutSectionProps) {
               className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90vw] max-w-[700px] max-h-[80vh]"
             >
               <div className="bg-[#f5f2e8] border-4 border-[#2a2520] shadow-[8px_8px_0px_0px_#2a2520] overflow-hidden">
-                {/* Browser chrome */}
+                {/* Browser top bar with traffic lights and URL */}
                 <div className="bg-[#2a2520] text-[#f5f2e8] px-4 py-2">
-                  {/* Traffic lights */}
+                  {/* Traffic light buttons */}
                   <div className="flex items-center gap-2 mb-2">
                     <button
                       onClick={() => setShowBrowser(false)}
@@ -283,9 +279,10 @@ export function AboutSection({ aboutData }: AboutSectionProps) {
                   ))}
                 </div>
                 
-                {/* Content */}
+                {/* Content of the active tab */}
                 <div className="p-6 max-h-[50vh] overflow-y-auto">
                   <AnimatePresence mode="wait">
+                    {/* Background tab content */}
                     {activeTab === "background" && (
                       <motion.div
                         key="background"
@@ -326,6 +323,7 @@ export function AboutSection({ aboutData }: AboutSectionProps) {
                       </motion.div>
                     )}
                     
+                    {/* Interests tab content */}
                     {activeTab === "interests" && (
                       <motion.div
                         key="interests"
@@ -355,6 +353,7 @@ export function AboutSection({ aboutData }: AboutSectionProps) {
                       </motion.div>
                     )}
                     
+                    {/* Goals tab content */}
                     {activeTab === "goals" && (
                       <motion.div
                         key="goals"

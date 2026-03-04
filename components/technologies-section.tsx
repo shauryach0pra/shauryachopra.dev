@@ -5,6 +5,7 @@ import React from "react"
 import { useState, useRef, useCallback, useEffect } from "react"
 import { motion } from "framer-motion"
 
+// Define the structure for a skill category
 interface SkillCategory {
   name: string
   color: string
@@ -12,10 +13,12 @@ interface SkillCategory {
   skills: string[]
 }
 
+// Define the props for the TechnologiesSection component
 interface TechnologiesSectionProps {
   skills: SkillCategory[]
 }
 
+// Map color names to their hex values
 const colorMap: Record<string, string> = {
   violet: "#8b5cf6",
   indigo: "#6366f1",
@@ -26,7 +29,14 @@ const colorMap: Record<string, string> = {
   red: "#ef4444",
 }
 
+/**
+ * Renders an interactive "painting" scene to display skills.
+ * Users can select colors and paint on a canvas to reveal skill categories.
+ * @param {TechnologiesSectionProps} props - The props for the component.
+ * @returns {JSX.Element} The TechnologiesSection component.
+ */
 export function TechnologiesSection({ skills }: TechnologiesSectionProps) {
+  // State for the selected color, painted areas, and drawing status
   const [selectedColor, setSelectedColor] = useState<string>("violet")
   const [paintedAreas, setPaintedAreas] = useState<Map<string, Set<string>>>(new Map())
   const [isDrawing, setIsDrawing] = useState(false)
@@ -35,7 +45,7 @@ export function TechnologiesSection({ skills }: TechnologiesSectionProps) {
 
   const colors = ["violet", "indigo", "blue", "green", "yellow", "orange", "red"]
 
-  // Canvas drawing
+  // Handlers for drawing on the canvas
   const startDrawing = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     setIsDrawing(true)
     draw(e)
@@ -56,14 +66,14 @@ export function TechnologiesSection({ skills }: TechnologiesSectionProps) {
     ctx.fillStyle = colorMap[selectedColor]
     ctx.globalAlpha = 0.6
     
-    // Draw pixel blocks
+    // Draw in blocks for a pixelated effect
     const blockSize = 20
     const blockX = Math.floor(x / blockSize) * blockSize
     const blockY = Math.floor(y / blockSize) * blockSize
     
     ctx.fillRect(blockX, blockY, blockSize, blockSize)
     
-    // Track painted areas by color
+    // Track the painted areas for each color
     const areaKey = `${blockX}-${blockY}`
     setPaintedAreas(prev => {
       const newMap = new Map(prev)
@@ -73,7 +83,7 @@ export function TechnologiesSection({ skills }: TechnologiesSectionProps) {
       return newMap
     })
     
-    // Reveal category when enough area is painted
+    // Reveal the skill category when enough of its area has been painted
     const category = skills.find(s => s.color === selectedColor)
     if (category) {
       const colorAreas = paintedAreas.get(selectedColor)
@@ -87,7 +97,7 @@ export function TechnologiesSection({ skills }: TechnologiesSectionProps) {
     setIsDrawing(false)
   }, [])
 
-  // Check reveal after paint areas update
+  // Effect to check for revealed categories after the painted areas are updated
   useEffect(() => {
     const colorAreas = paintedAreas.get(selectedColor)
     if (colorAreas && colorAreas.size > 10) {
@@ -98,7 +108,7 @@ export function TechnologiesSection({ skills }: TechnologiesSectionProps) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#87ceeb] to-[#98fb98] p-8 pt-24">
       <div className="max-w-6xl mx-auto">
-        {/* Title */}
+        {/* Section title */}
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -107,14 +117,13 @@ export function TechnologiesSection({ skills }: TechnologiesSectionProps) {
         </motion.h2>
         
         <div className="flex flex-col lg:flex-row gap-8 items-start">
-          {/* Garden scene with painter */}
+          {/* The painter character */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
             className="relative flex-shrink-0"
           >
-            {/* Painter character */}
             <svg
               width="150"
               height="200"
@@ -129,7 +138,7 @@ export function TechnologiesSection({ skills }: TechnologiesSectionProps) {
               {/* Head */}
               <rect x="55" y="30" width="40" height="35" fill="#e8d4b8" />
               
-              {/* Eyes */}
+              {/* Blinking eyes */}
               <motion.rect
                 x="62" y="40" width="6" height="6" fill="#2a2520"
                 animate={{ scaleY: [1, 0.1, 1] }}
@@ -144,16 +153,14 @@ export function TechnologiesSection({ skills }: TechnologiesSectionProps) {
               {/* Mustache */}
               <path d="M68 52 Q75 58 82 52" fill="#2a2520" />
               
-              {/* Smock/shirt */}
+              {/* Smock with paint splatters */}
               <rect x="45" y="65" width="60" height="80" fill="#f5f2e8" />
-              
-              {/* Paint splatters on smock */}
               <rect x="50" y="75" width="8" height="8" fill="#8b5cf6" opacity="0.7" />
               <rect x="85" y="90" width="6" height="6" fill="#22c55e" opacity="0.7" />
               <rect x="60" y="110" width="10" height="6" fill="#3b82f6" opacity="0.7" />
               <rect x="80" y="120" width="5" height="8" fill="#eab308" opacity="0.7" />
               
-              {/* Arms */}
+              {/* Animated arm with paintbrush */}
               <motion.g
                 animate={{ rotate: [-5, 5, -5] }}
                 transition={{ duration: 1, repeat: Infinity }}
@@ -161,13 +168,12 @@ export function TechnologiesSection({ skills }: TechnologiesSectionProps) {
               >
                 <rect x="25" y="70" width="25" height="15" fill="#f5f2e8" />
                 <rect x="15" y="75" width="15" height="12" fill="#e8d4b8" />
-                {/* Brush in hand */}
                 <rect x="5" y="70" width="15" height="5" fill="#8b4513" />
                 <rect x="0" y="68" width="8" height="8" fill={colorMap[selectedColor]} />
               </motion.g>
               
+              {/* Other arm with palette */}
               <rect x="100" y="70" width="25" height="15" fill="#f5f2e8" />
-              {/* Palette in other hand */}
               <ellipse cx="130" cy="90" rx="20" ry="12" fill="#8b4513" />
               {colors.map((color, i) => (
                 <circle
@@ -179,11 +185,9 @@ export function TechnologiesSection({ skills }: TechnologiesSectionProps) {
                 />
               ))}
               
-              {/* Legs */}
+              {/* Legs and feet */}
               <rect x="55" y="145" width="15" height="40" fill="#2a2520" />
               <rect x="80" y="145" width="15" height="40" fill="#2a2520" />
-              
-              {/* Feet */}
               <rect x="50" y="180" width="25" height="10" fill="#4a3728" />
               <rect x="75" y="180" width="25" height="10" fill="#4a3728" />
             </svg>
@@ -192,14 +196,14 @@ export function TechnologiesSection({ skills }: TechnologiesSectionProps) {
             </p>
           </motion.div>
           
-          {/* Painting area */}
+          {/* The painting area */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.5 }}
             className="flex-1"
           >
-            {/* Color palette */}
+            {/* Color selection palette */}
             <div className="flex justify-center gap-2 mb-4">
               {colors.map((color) => (
                 <button
@@ -216,7 +220,7 @@ export function TechnologiesSection({ skills }: TechnologiesSectionProps) {
               ))}
             </div>
             
-            {/* Canvas for painting */}
+            {/* The canvas for painting */}
             <div className="relative bg-[#f5f2e8] border-4 border-[#8b4513] shadow-[4px_4px_0px_0px_#4a3728]">
               <canvas
                 ref={canvasRef}
@@ -230,12 +234,12 @@ export function TechnologiesSection({ skills }: TechnologiesSectionProps) {
                 style={{ imageRendering: "pixelated" }}
               />
               
-              {/* Easel frame hint */}
+              {/* Easel stand hint */}
               <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[30px] border-t-[#8b4513]" />
             </div>
           </motion.div>
           
-          {/* Revealed skills */}
+          {/* The list of discovered skills */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -271,6 +275,7 @@ export function TechnologiesSection({ skills }: TechnologiesSectionProps) {
                     </span>
                   </div>
                   
+                  {/* Display skills if the category is revealed */}
                   {isRevealed && hasSkills && (
                     <div className="flex flex-wrap gap-1">
                       {category.skills.map((skill) => (
@@ -295,9 +300,8 @@ export function TechnologiesSection({ skills }: TechnologiesSectionProps) {
           </motion.div>
         </div>
         
-        {/* Garden decorations */}
+        {/* Animated flowers at the bottom of the scene */}
         <div className="mt-8 flex justify-around">
-          {/* Flowers */}
           {[...Array(5)].map((_, i) => (
             <motion.div
               key={i}

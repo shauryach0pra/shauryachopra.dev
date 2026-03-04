@@ -2,20 +2,28 @@
 
 import { motion } from "framer-motion"
 
+// Define the props for the PatrickBateman component
 interface PatrickBatemanProps {
   isAnimating: boolean
 }
 
+/**
+ * Renders a pixel-art character of Patrick Bateman.
+ * The character animates out of view when the `isAnimating` prop is true.
+ * @param {PatrickBatemanProps} props - The props for the component.
+ * @returns {JSX.Element} The PatrickBateman component.
+ */
 export function PatrickBateman({ isAnimating }: PatrickBatemanProps) {
   return (
     <motion.div
       initial={{ opacity: 1, y: 0 }}
+      // Animate the character out of view
       animate={isAnimating ? { opacity: 0, y: -50 } : { opacity: 1, y: 0 }}
       transition={{ duration: 0.8, delay: 1.2 }}
       className="absolute"
       style={{ top: 90, left: 720, transform: "translateX(-50%)" }}
     >
-      {/* Pixel art character - simplified businessman dropping card */}
+      {/* SVG for the pixel-art character */}
       <svg
         width="120"
         height="180"
@@ -47,30 +55,26 @@ export function PatrickBateman({ isAnimating }: PatrickBatemanProps) {
         {/* Neck */}
         <rect x="52" y="60" width="16" height="10" fill="#e8d4b8" />
         
-        {/* Suit body */}
+        {/* Suit */}
         <rect x="30" y="70" width="60" height="70" fill="#2a2520" />
         
-        {/* Shirt collar */}
+        {/* Shirt and tie */}
         <rect x="50" y="70" width="20" height="15" fill="#f5f2e8" />
         <polygon points="50,70 60,85 50,85" fill="#f5f2e8" />
         <polygon points="70,70 60,85 70,85" fill="#f5f2e8" />
-        
-        {/* Tie */}
         <rect x="57" y="80" width="6" height="30" fill="#4a3728" />
         
-        {/* Lapels */}
+        {/* Suit lapels */}
         <polygon points="30,70 50,70 50,100 30,90" fill="#1a1815" />
         <polygon points="90,70 70,70 70,100 90,90" fill="#1a1815" />
         
-        {/* Arms */}
+        {/* Arms and hands */}
         <rect x="20" y="75" width="15" height="50" fill="#2a2520" />
         <rect x="85" y="75" width="15" height="50" fill="#2a2520" />
-        
-        {/* Hands */}
         <rect x="20" y="120" width="15" height="15" fill="#e8d4b8" />
         <rect x="85" y="120" width="15" height="15" fill="#e8d4b8" />
         
-        {/* Card dropping animation hint */}
+        {/* The business card, animated to drop out of view */}
         <motion.g
           initial={{ y: 0, rotate: 0, opacity: 1 }}
           animate={isAnimating ? { y: 200, rotate: 15, opacity: 0 } : { y: 0 }}

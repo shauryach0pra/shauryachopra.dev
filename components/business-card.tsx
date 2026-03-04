@@ -2,13 +2,21 @@
 
 import { motion } from "framer-motion"
 
+// Define the props for the BusinessCard component
 interface BusinessCardProps {
   onAnimationComplete?: () => void
 }
 
+/**
+ * Renders a pixel-art styled business card with contact information and links.
+ * The card has an animation on initial render.
+ * @param {BusinessCardProps} props - The props for the component.
+ * @returns {JSX.Element} The BusinessCard component.
+ */
 export function BusinessCard({ onAnimationComplete }: BusinessCardProps) {
   return (
     <motion.div
+      // Initial animation properties
       initial={{ y: -100, opacity: 0, rotate: -10 }}
       animate={{ y: 0, opacity: 1, rotate: 0 }}
       transition={{
@@ -23,7 +31,7 @@ export function BusinessCard({ onAnimationComplete }: BusinessCardProps) {
         imageRendering: "pixelated",
       }}
     >
-      {/* Card texture overlay */}
+      {/* Subtle texture overlay for the card */}
       <div 
         className="absolute inset-0 opacity-30"
         style={{
@@ -32,23 +40,23 @@ export function BusinessCard({ onAnimationComplete }: BusinessCardProps) {
         }}
       />
       
-      {/* Card content */}
+      {/* Content of the business card */}
       <div className="relative h-full p-6 flex flex-col justify-between font-[var(--font-pixel-body)]">
-        {/* Top row */}
+        {/* Top section with contact info and university */}
         <div className="flex justify-between items-start">
-          {/* Left - Contact */}
+          {/* Contact information */}
           <div className="text-[#2a2520]/80 text-xs md:text-sm space-y-1 tracking-wide">
             <p>shauryachopra@zohomail.in</p>
             <p>+91 9137887901</p>
           </div>
           
-          {/* Right - University */}
+          {/* University */}
           <div className="text-[#2a2520]/80 text-xs md:text-sm text-right tracking-wide">
             <p>Mumbai University</p>
           </div>
         </div>
         
-        {/* Center - Name and Tagline */}
+        {/* Center section with name and tagline */}
         <div className="text-center space-y-2">
           <h1 
             className="text-[#2a2520] text-xl md:text-2xl tracking-[0.2em] font-[var(--font-pixel)]"
@@ -64,7 +72,7 @@ export function BusinessCard({ onAnimationComplete }: BusinessCardProps) {
           </p>
         </div>
         
-        {/* Bottom - Links */}
+        {/* Bottom section with social links */}
         <div className="flex justify-center gap-8 text-xs md:text-sm">
           <a 
             href="https://www.linkedin.com/in/shaurya-chopra-1a1922379/"
@@ -85,7 +93,7 @@ export function BusinessCard({ onAnimationComplete }: BusinessCardProps) {
         </div>
       </div>
       
-      {/* Embossed effect border */}
+      {/* Embossed border effect */}
       <div className="absolute inset-0 border border-[#fff]/30 pointer-events-none" />
     </motion.div>
   )

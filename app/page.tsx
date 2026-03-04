@@ -1,17 +1,22 @@
+// Specifies that this code should run on the client-side
 "use client"
 
-import React from "react"
-import { useState, useEffect, useCallback, useRef } from "react"
+// Import necessary React hooks and components
+import React, { useState, useEffect, useCallback, useRef } from "react"
+// Import animation components from Framer Motion
 import { motion, AnimatePresence } from "framer-motion"
+// Import icons from Lucide React
 import { Volume2, VolumeX, Home, Briefcase, User, Palette, Monitor, Github, Linkedin, Mail, Phone, X } from "lucide-react"
 
-// Import data
+// Import data for skills, projects, and about sections
 import { skillsData } from "@/data/skills"
 import { projectsData } from "@/data/projects"
 import { aboutData } from "@/data/about"
 
+// Define the available sections in the portfolio
 type Section = "card" | "projects" | "technologies" | "about"
 
+// Define the structure of a project object
 interface Project {
   id: number
   name: string
@@ -22,37 +27,42 @@ interface Project {
   liveDemo: string
 }
 
-// Responsive wrapper - scales everything uniformly to fit viewport
+/**
+ * A responsive wrapper that scales its children to fit the viewport while maintaining aspect ratio.
+ * This component ensures the portfolio looks consistent across different screen sizes.
+ * @param {object} props - The component props.
+ * @param {React.ReactNode} props.children - The content to be rendered inside the wrapper.
+ * @returns {JSX.Element} The responsive wrapper component.
+ */
 function ResponsiveWrapper({ children }: { children: React.ReactNode }) {
+  // State to hold the calculated scale and vertical offset
   const [scale, setScale] = useState(1)
   const [vOffset, setVOffset] = useState(0)
+  
+  // Base dimensions for the portfolio layout
   const BASE_WIDTH = 1440
   const BASE_HEIGHT = 900
   const MIN_SCALE = 0.5
 
   useEffect(() => {
+    // Function to update the scale and offset based on window size
     const updateScale = () => {
-      // Use clientHeight/Width for more stable measurements on Safari
       const width = document.documentElement.clientWidth
       const height = document.documentElement.clientHeight
       const scaleX = width / BASE_WIDTH
       const scaleY = height / BASE_HEIGHT
       
-      // Use Math.max instead of Math.min to ensure the content always covers the screen
-      // This eliminates black bars by allowing slight clipping on the edges
+      // Use Math.max to ensure the content covers the screen, preventing black bars
       const newScale = Math.max(MIN_SCALE, Math.max(scaleX, scaleY))
       setScale(newScale)
 
-      // Calculate if we need to shift the content to protect the top UI
+      // Adjust vertical offset to keep the top navigation visible
       const containerHeightOnScreen = BASE_HEIGHT * newScale
       if (containerHeightOnScreen > height) {
         const overflowAtTop = (containerHeightOnScreen - height) / 2
         const navHeight = 60 * newScale // Approximate height of the top navigation bar
         
-        // Only shift if the navigation bar would be cut off
         if (overflowAtTop > 20 * newScale) {
-          // Shift just enough to keep the navigation bar visible with a small margin
-          // Instead of shifting all the way to the top, we keep it more balanced
           const targetTop = 10 * newScale 
           const currentTop = -overflowAtTop
           const shiftNeeded = targetTop - currentTop
@@ -65,10 +75,12 @@ function ResponsiveWrapper({ children }: { children: React.ReactNode }) {
       }
     }
 
+    // Initial scale update and event listeners for resize and orientation change
     updateScale()
     window.addEventListener("resize", updateScale)
-    // Also listen for orientationchange for mobile Safari
     window.addEventListener("orientationchange", updateScale)
+    
+    // Cleanup event listeners on component unmount
     return () => {
       window.removeEventListener("resize", updateScale)
       window.removeEventListener("orientationchange", updateScale)
@@ -92,17 +104,24 @@ function ResponsiveWrapper({ children }: { children: React.ReactNode }) {
   )
 }
 
-// Sound hook
+/**
+ * Custom hook to manage and play sound effects.
+ * @param {boolean} isMuted - Whether the sound is muted.
+ * @returns {object} An object with functions to play different sounds.
+ */
 function useSounds(isMuted: boolean) {
+  // Ref to hold the AudioContext instance
   const audioContextRef = useRef<AudioContext | null>(null)
 
+  // Function to get or create the AudioContext
   const getAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
     }
     return audioContextRef.current
   }, [])
 
+  // Function to play a tone with a specific frequency and duration
   const playTone = useCallback((frequency: number, duration: number, type: OscillatorType = "square") => {
     if (isMuted) return
     try {
@@ -122,6 +141,7 @@ function useSounds(isMuted: boolean) {
     }
   }, [isMuted, getAudioContext])
 
+  // Specific sound effect functions
   const playClick = useCallback(() => playTone(800, 0.05), [playTone])
   
   const playCardFlick = useCallback(() => {
@@ -181,20 +201,26 @@ function useSounds(isMuted: boolean) {
   return { playClick, playCardFlick, playCardLand, playSpill }
 }
 
-// Ambient music hook
+/**
+ * Custom hook to manage ambient background music.
+ * @param {boolean} isPlaying - Whether the music should be playing.
+ */
 function useAmbientMusic(isPlaying: boolean) {
+  // Refs to hold the AudioContext and oscillator nodes
   const audioContextRef = useRef<AudioContext | null>(null)
   const oscillatorsRef = useRef<OscillatorNode[]>([])
 
   useEffect(() => {
     if (isPlaying) {
       try {
-        const ctx = new (window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
+        // Create AudioContext and master gain node
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
         audioContextRef.current = ctx
         const masterGain = ctx.createGain()
         masterGain.gain.value = 0.03
         masterGain.connect(ctx.destination)
 
+        // Create and play a set of sine wave oscillators for an ambient drone
         const notes = [65.41, 82.41, 98.00, 130.81]
         notes.forEach((freq, i) => {
           const osc = ctx.createOscillator()
@@ -209,6 +235,7 @@ function useAmbientMusic(isPlaying: boolean) {
         })
       } catch {}
     } else {
+      // Stop and clean up oscillators and AudioContext when not playing
       oscillatorsRef.current.forEach(osc => {
         try { osc.stop() } catch {}
       })
@@ -219,6 +246,7 @@ function useAmbientMusic(isPlaying: boolean) {
       }
     }
 
+    // Cleanup on component unmount
     return () => {
       oscillatorsRef.current.forEach(osc => {
         try { osc.stop() } catch {}
@@ -230,7 +258,15 @@ function useAmbientMusic(isPlaying: boolean) {
   }, [isPlaying])
 }
 
-// 8-BIT PIXEL BUTTON COMPONENT
+/**
+ * A pixel-art-styled button component.
+ * @param {object} props - The component props.
+ * @param {React.ReactNode} props.children - The content of the button.
+ * @param {() => void} props.onClick - The function to call when the button is clicked.
+ * @param {boolean} props.isActive - Whether the button is in an active state.
+ * @param {string} props.className - Additional CSS classes for the button.
+ * @returns {JSX.Element} The pixel button component.
+ */
 function PixelButton({ 
   children, 
   onClick, 
@@ -260,20 +296,29 @@ function PixelButton({
   )
 }
 
+/**
+ * The main portfolio component that orchestrates the different sections and animations.
+ * @returns {JSX.Element} The portfolio component.
+ */
 export default function Portfolio() {
+  // State to manage the current visible section
   const [currentSection, setCurrentSection] = useState<Section>("card")
+  // State to manage the currently selected project
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+  // State to manage the current phase of the intro animation
   const [animationPhase, setAnimationPhase] = useState<"intro" | "walking" | "throwing" | "spinning" | "landed" | "zooming" | "ready">("intro")
+  // State to manage whether the sound is muted
   const [isMuted, setIsMuted] = useState(true)
+  // State to detect if the user is on a mobile device
   const [isMobile, setIsMobile] = useState(false)
+  // State to track if the intro animation has been played
   const [hasPlayedIntro, setHasPlayedIntro] = useState(false)
   
-  console.log("[v0] Portfolio rendering, animationPhase:", animationPhase, "isMobile:", isMobile, "currentSection:", currentSection)
-  
+  // Custom hooks for sound effects and ambient music
   const { playClick, playCardFlick, playCardLand, playSpill } = useSounds(isMuted)
-  
   useAmbientMusic(!isMuted)
 
+  // Effect to detect mobile devices
   useEffect(() => {
     setIsMobile(window.innerWidth < 768)
     const handleResize = () => setIsMobile(window.innerWidth < 768)
@@ -281,30 +326,24 @@ export default function Portfolio() {
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  // Intro animation sequence - only plays once
+  // Effect to manage the intro animation sequence
   useEffect(() => {
     if (hasPlayedIntro) {
       setAnimationPhase("ready")
       return
     }
     
-    // Patrick walks from left to center
     const t1 = setTimeout(() => setAnimationPhase("walking"), 200)
-    // Patrick stops and throws the card
     const t2 = setTimeout(() => {
       setAnimationPhase("throwing")
       playCardFlick()
     }, 1600)
-    // Card starts spinning through the air
     const t3 = setTimeout(() => setAnimationPhase("spinning"), 1900)
-    // Card lands on the table
     const t4 = setTimeout(() => {
       setAnimationPhase("landed")
       playCardLand()
     }, 2900)
-    // Start zooming in - Patrick exits during this phase
     const t5 = setTimeout(() => setAnimationPhase("zooming"), 3400)
-    // Animation complete
     const t6 = setTimeout(() => {
       setAnimationPhase("ready")
       setHasPlayedIntro(true)
@@ -312,15 +351,16 @@ export default function Portfolio() {
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); clearTimeout(t5); clearTimeout(t6) }
   }, [playCardFlick, playCardLand, hasPlayedIntro])
 
+  // Function to handle navigation between sections
   const handleNavigate = useCallback((section: Section) => {
     playClick()
     setCurrentSection(section)
   }, [playClick])
 
+  // Render a mobile warning if the screen is too small
   if (isMobile) {
     return (
       <div className="min-h-screen bg-wall-dark flex items-center justify-center p-8">
-      
         <div className="bg-primary border-4 border-primary/70 p-8 text-center max-w-sm" style={{ imageRendering: "pixelated" }}>
           <Monitor className="w-16 h-16 mx-auto text-destructive mb-4" />
           <h1 className="font-mono text-lg text-primary-foreground mb-4">Desktop Required</h1>
@@ -335,77 +375,86 @@ export default function Portfolio() {
   return (
     <ResponsiveWrapper>
       <main className="w-full h-full overflow-hidden relative">
-      
-      {/* 8-BIT PIXEL NAVIGATION */}
-      <motion.nav
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: animationPhase === "ready" ? 0 : 5.5, duration: 0.5 }}
-        className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2"
-        style={{ imageRendering: "pixelated" }}
-      >
-        {[
-  { id: "card" as Section, icon: Home, label: "HOME" },
-  { id: "technologies" as Section, icon: Palette, label: "SKILLS" },
-  { id: "projects" as Section, icon: Briefcase, label: "PROJECTS" },
-  { id: "about" as Section, icon: User, label: "ABOUT" },
-].map((item) => (
-          <PixelButton
-            key={item.id}
-            onClick={() => handleNavigate(item.id)}
-            isActive={currentSection === item.id}
-          >
-            <span className="flex items-center gap-2">
-              <item.icon size={12} strokeWidth={2.5} />
-              {item.label}
-            </span>
-          </PixelButton>
-        ))}
-        
-        <PixelButton
-          onClick={() => { setIsMuted(!isMuted); playClick() }}
-          isActive={!isMuted}
+        {/* Navigation bar */}
+        <motion.nav
+          initial={{ y: -100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: animationPhase === "ready" ? 0 : 5.5, duration: 0.5 }}
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2"
+          style={{ imageRendering: "pixelated" }}
         >
-          {isMuted ? <VolumeX size={14} strokeWidth={2.5} /> : <Volume2 size={14} strokeWidth={2.5} />}
-        </PixelButton>
-      </motion.nav>
+          {[
+            { id: "card" as Section, icon: Home, label: "HOME" },
+            { id: "technologies" as Section, icon: Palette, label: "SKILLS" },
+            { id: "projects" as Section, icon: Briefcase, label: "PROJECTS" },
+            { id: "about" as Section, icon: User, label: "ABOUT" },
+          ].map((item) => (
+            <PixelButton
+              key={item.id}
+              onClick={() => handleNavigate(item.id)}
+              isActive={currentSection === item.id}
+            >
+              <span className="flex items-center gap-2">
+                <item.icon size={12} strokeWidth={2.5} />
+                {item.label}
+              </span>
+            </PixelButton>
+          ))}
+          
+          {/* Mute button */}
+          <PixelButton
+            onClick={() => { setIsMuted(!isMuted); playClick() }}
+            isActive={!isMuted}
+          >
+            {isMuted ? <VolumeX size={14} strokeWidth={2.5} /> : <Volume2 size={14} strokeWidth={2.5} />}
+          </PixelButton>
+        </motion.nav>
 
-      <AnimatePresence mode="wait">
-        {currentSection === "card" && (
-          <CardScene key="card" animationPhase={animationPhase} hasPlayedIntro={hasPlayedIntro} playClick={playClick} />
-        )}
-        {currentSection === "projects" && (
-          <ProjectsScene 
-            key="projects" 
-            projects={projectsData}
-            selectedProject={selectedProject}
-            onSelectProject={setSelectedProject}
-            onCloseProject={() => setSelectedProject(null)}
-            playClick={playClick}
-          />
-        )}
-        {currentSection === "technologies" && (
-          <TechnologiesScene key="technologies" skills={skillsData} playClick={playClick} />
-        )}
-        {currentSection === "about" && (
-          <AboutScene key="about" aboutData={aboutData} playClick={playClick} />
-        )}
-      </AnimatePresence>
+        {/* Animated presence for section transitions */}
+        <AnimatePresence mode="wait">
+          {currentSection === "card" && (
+            <CardScene key="card" animationPhase={animationPhase} hasPlayedIntro={hasPlayedIntro} playClick={playClick} />
+          )}
+          {currentSection === "projects" && (
+            <ProjectsScene 
+              key="projects" 
+              projects={projectsData}
+              selectedProject={selectedProject}
+              onSelectProject={setSelectedProject}
+              onCloseProject={() => setSelectedProject(null)}
+              playClick={playClick}
+            />
+          )}
+          {currentSection === "technologies" && (
+            <TechnologiesScene key="technologies" skills={skillsData} playClick={playClick} />
+          )}
+          {currentSection === "about" && (
+            <AboutScene key="about" aboutData={aboutData} playClick={playClick} />
+          )}
+        </AnimatePresence>
       </main>
     </ResponsiveWrapper>
   )
 }
 
-// ============ CARD SCENE - Patrick Bateman's Office ============
+/**
+ * Renders the main card scene, which is the initial view of the portfolio.
+ * This scene features an animation of a business card being thrown onto a desk.
+ * @param {object} props - The component props.
+ * @param {string} props.animationPhase - The current phase of the intro animation.
+ * @param {boolean} props.hasPlayedIntro - Whether the intro animation has already played.
+ * @param {() => void} props.playClick - Function to play a click sound.
+ * @returns {JSX.Element} The card scene component.
+ */
 function CardScene({ animationPhase, hasPlayedIntro, playClick }: { animationPhase: string, hasPlayedIntro: boolean, playClick: () => void }) {
+  // Determine if the scene should be in a zoomed state
   const isZoomed = animationPhase === "zooming" || animationPhase === "ready"
+  // Determine if the character should be shown
   const showCharacter = !hasPlayedIntro && ["intro", "walking", "throwing", "spinning", "landed", "zooming"].includes(animationPhase)
   
-  // Base dimensions for positioning (1440x900)
+  // Base dimensions for positioning
   const BASE_W = 1440
   const BASE_H = 900
-  const CENTER_X = BASE_W / 2  // 720
-  const CENTER_Y = BASE_H / 2  // 450
   
   return (
     <motion.div
@@ -416,16 +465,16 @@ function CardScene({ animationPhase, hasPlayedIntro, playClick }: { animationPha
       className="w-full h-full relative overflow-hidden"
       style={{ width: `${BASE_W}px`, height: `${BASE_H}px` }}
     >
-      {/* Scene container - starts closer, zooms to card */}
+      {/* Scene container that zooms in on the card */}
       <motion.div
         animate={isZoomed ? { scale: 2.2, y: -18 } : { scale: 1.6, y: 0 }}
         transition={{ duration: hasPlayedIntro ? 0 : 1.5, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="absolute inset-0 origin-center"
         style={{ imageRendering: "pixelated" }}
       >
-        {/* Dark office wall */}
+        {/* Background elements of the scene */}
         <div className="absolute left-0 right-0 bg-wall" style={{ top: 0, height: 378 }}>
-          {/* Wall paneling */}
+          {/* Wall paneling texture */}
           <svg className="absolute inset-0 w-full h-full opacity-12">
             <defs>
               <pattern id="wallPanel" patternUnits="userSpaceOnUse" width="100" height="180">
@@ -435,7 +484,7 @@ function CardScene({ animationPhase, hasPlayedIntro, playClick }: { animationPha
             <rect width="100%" height="100%" fill="url(#wallPanel)" />
           </svg>
           
-          {/* Painting on left */}
+          {/* Painting on the wall */}
           <div className="absolute" style={{ top: 68, left: 144 }}>
             <svg width="90" height="70" viewBox="0 0 90 70">
               <rect x="0" y="0" width="90" height="70" fill="#8b6914" />
@@ -443,11 +492,9 @@ function CardScene({ animationPhase, hasPlayedIntro, playClick }: { animationPha
               <ellipse cx="45" cy="40" rx="22" ry="16" fill="#2a5a6a" />
             </svg>
           </div>
-
-          
         </div>
 
-        {/* Mahogany desk surface - closer view */}
+        {/* Desk surface */}
         <div className="absolute left-0 right-0 bottom-0 bg-table" style={{ top: 345 }}>
           <svg className="absolute inset-0 w-full h-full opacity-35">
             <defs>
@@ -459,9 +506,9 @@ function CardScene({ animationPhase, hasPlayedIntro, playClick }: { animationPha
           </svg>
         </div>
 
-        {/* ===== TABLE ITEMS - Properly arranged around CENTERED card ===== */}
+        {/* Desk items */}
         
-        {/* LAMP - At the top of the table, centered at x=720 (center of 1440) */}
+        {/* Lamp */}
         <div 
           className="absolute" 
           style={{ 
@@ -471,19 +518,14 @@ function CardScene({ animationPhase, hasPlayedIntro, playClick }: { animationPha
           }}
         >
           <svg width="280" height="300" viewBox="0 0 200 220">
-            {/* Lamp shade - green banker style */}
             <polygon points="35,50 165,50 180,100 20,100" fill="#1a5a3a" />
             <polygon points="40,55 160,55 172,95 28,95" fill="#228b22" />
-            {/* Brass band */}
             <rect x="30" y="46" width="140" height="6" fill="#d4af37" />
-            {/* Brass arm */}
             <rect x="92" y="100" width="16" height="90" fill="#d4af37" />
             <rect x="96" y="100" width="8" height="90" fill="#c0a030" />
-            {/* Base */}
             <ellipse cx="100" cy="198" rx="50" ry="16" fill="#d4af37" />
             <ellipse cx="100" cy="194" rx="42" ry="12" fill="#c0a030" />
           </svg>
-          {/* Subtle ambient glow underneath */}
           <div 
             className="absolute"
             style={{ 
@@ -496,75 +538,54 @@ function CardScene({ animationPhase, hasPlayedIntro, playClick }: { animationPha
           />
         </div>
 
-        {/* CIGAR - Left of card (center=720, offset left by 400 = 320) */}
+        {/* Cigar */}
         <div className="absolute" style={{ top: 468, left: 330 }}>
           <svg width="180" height="100" viewBox="0 0 130 70">
-            {/* Cigar body */}
             <rect x="0" y="28" width="100" height="18" fill="#8b4513" rx="3" />
             <rect x="0" y="28" width="100" height="7" fill="#a0522d" rx="3" />
-            {/* Gold band */}
             <rect x="75" y="26" width="18" height="22" fill="#d4af37" />
             <rect x="77" y="28" width="14" height="18" fill="#c0a030" />
-            {/* Ember base */}
-<rect x="100" y="30" width="5" height="14" fill="#3d1a0a" />
-
-{/* Soft outer glow */}
-<motion.rect x="99" y="29" width="7" height="16" fill="#ff4500" rx="2"
-  animate={{ opacity: [0.2, 0.35, 0.2] }}
-  transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
-/>
-
-{/* Mid ember */}
-<motion.rect x="100" y="30" width="5" height="14" fill="#ff6b35" rx="1"
-  animate={{ opacity: [0.7, 0.9, 0.7] }}
-  transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
-/>
-
-{/* Hot core */}
-<motion.rect x="101" y="32" width="3" height="10" fill="#ffcc66" rx="1"
-  animate={{ opacity: [0.8, 1, 0.75, 1, 0.8] }}
-  transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
-/>
-            
+            <rect x="100" y="30" width="5" height="14" fill="#3d1a0a" />
+            <motion.rect x="99" y="29" width="7" height="16" fill="#ff4500" rx="2"
+              animate={{ opacity: [0.2, 0.35, 0.2] }}
+              transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.rect x="100" y="30" width="5" height="14" fill="#ff6b35" rx="1"
+              animate={{ opacity: [0.7, 0.9, 0.7] }}
+              transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.rect x="101" y="32" width="3" height="10" fill="#ffcc66" rx="1"
+              animate={{ opacity: [0.8, 1, 0.75, 1, 0.8] }}
+              transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
+            />
           </svg>
         </div>
 
-        {/* MONTBLANC PEN - Right of card (center=720 + 220 = 940) */}
+        {/* Pen */}
         <div className="absolute" style={{ top: 468, left: 940, transform: "rotate(-120deg)", transformOrigin: "center" }}>
-
           <svg width="200" height="60" viewBox="0 0 150 45">
-            {/* Pen body - black */}
             <rect x="0" y="16" width="105" height="14" fill="#0a0a0a" rx="2" />
             <rect x="0" y="16" width="105" height="5" fill="#1a1a1a" />
-            {/* Gold band */}
             <rect x="85" y="14" width="12" height="18" fill="#d4af37" />
-            {/* Cap */}
             <rect x="97" y="13" width="48" height="20" fill="#0a0a0a" rx="2" />
             <rect x="97" y="13" width="48" height="7" fill="#1a1a1a" />
-            {/* Montblanc star emblem */}
             <circle cx="138" cy="23" r="8" fill="#fff" />
             <polygon points="138,16 140,20 145,20 141,23 143,28 138,25 133,28 135,23 131,20 136,20" fill="#0a0a0a" />
-            {/* Nib */}
             <polygon points="0,23 -14,19 -14,27" fill="#d4af37" />
           </svg>
         </div>
 
-        {/* Patrick Bateman - Enters from left edge, stops left of lamp, exits right edge behind lamp */}
+        {/* Animated character */}
         <AnimatePresence>
           {showCharacter && (
             <motion.div
               initial={{ x: -450 }}
-              animate={
-                animationPhase === "intro" 
-                  ? { x: -450 }
-                  : animationPhase === "walking"
-                  ? { x: 0 }
-                  : animationPhase === "throwing" || animationPhase === "spinning" || animationPhase === "landed"
-                  ? { x: 0 }
-                  : animationPhase === "zooming"
-                  ? { x: 1200 }
-                  : { x: 1200 }
-              }
+              animate={{
+                x: animationPhase === "intro" ? -450 :
+                   animationPhase === "walking" ? 0 :
+                   animationPhase === "throwing" || animationPhase === "spinning" || animationPhase === "landed" ? 0 :
+                   1200
+              }}
               transition={{ 
                 duration: animationPhase === "walking" ? 1.2 : animationPhase === "zooming" ? 1.2 : 0, 
                 ease: [0.25, 0.1, 0.25, 1]
@@ -573,49 +594,28 @@ function CardScene({ animationPhase, hasPlayedIntro, playClick }: { animationPha
               style={{ left: 350, top: 175, zIndex: 5 }}
             >
               <svg width="120" height="200" viewBox="0 0 120 200" style={{ imageRendering: "pixelated" }}>
-                {/* Hair */}
                 <rect x="38" y="6" width="44" height="28" fill="#1a0a05" />
                 <rect x="33" y="18" width="54" height="20" fill="#1a0a05" />
-                
-                {/* Face - neutral expression */}
                 <rect x="38" y="30" width="44" height="42" fill="#e8d4b8" />
-                
-                {/* Eyes - calm */}
                 <rect x="44" y="42" width="10" height="6" fill="#fff" />
                 <rect x="66" y="42" width="10" height="6" fill="#fff" />
                 <rect x="47" y="43" width="4" height="4" fill="#4a90a4" />
                 <rect x="69" y="43" width="4" height="4" fill="#4a90a4" />
                 <rect x="48" y="44" width="2" height="2" fill="#1a1a1a" />
                 <rect x="70" y="44" width="2" height="2" fill="#1a1a1a" />
-                
-                {/* Eyebrows - relaxed */}
                 <rect x="44" y="38" width="10" height="3" fill="#1a0a05" />
                 <rect x="66" y="38" width="10" height="3" fill="#1a0a05" />
-                
-                {/* Nose */}
                 <rect x="56" y="48" width="8" height="12" fill="#d4b8a0" />
-                
-                {/* Mouth - neutral */}
                 <rect x="52" y="64" width="16" height="4" fill="#a06a5a" />
-                
-                {/* Neck */}
                 <rect x="50" y="72" width="20" height="10" fill="#e8d4b8" />
-                
-                {/* Black suit */}
                 <rect x="24" y="80" width="72" height="90" fill="#1a1a1a" />
                 <polygon points="24,80 60,80 50,130 24,130" fill="#2a2a2a" />
                 <polygon points="96,80 60,80 70,130 96,130" fill="#2a2a2a" />
-                
-                {/* White shirt */}
                 <rect x="48" y="80" width="24" height="36" fill="#f5f2e8" />
-                
-                {/* Red tie */}
                 <rect x="55" y="84" width="10" height="40" fill="#8b0000" />
                 <polygon points="55,124 65,124 60,135" fill="#8b0000" />
-                
-                {/* Arms */}
                 <motion.g
-                  animate={animationPhase === "throwing" ? { rotate: -30 } : { rotate: 0 }}
+                  animate={{ rotate: animationPhase === "throwing" ? -30 : 0 }}
                   transition={{ duration: 0.2 }}
                   style={{ transformOrigin: "24px 92px" }}
                 >
@@ -624,37 +624,43 @@ function CardScene({ animationPhase, hasPlayedIntro, playClick }: { animationPha
                 </motion.g>
                 <rect x="92" y="86" width="24" height="45" fill="#1a1a1a" />
                 <rect x="94" y="126" width="18" height="12" fill="#e8d4b8" />
-                
-                
               </svg>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* The Business Card - CENTERED, thrown from Patrick's hand */}
+        {/* Animated business card */}
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <motion.div
             initial={hasPlayedIntro ? { x: 0, y: 60, rotate: 720, scale: 0.5, opacity: 1 } : { x: -320, y: -120, rotate: 0, scale: 0.15, opacity: 0 }}
-            animate={
-              hasPlayedIntro
-                ? { x: 0, y: 60, rotate: 720, scale: 0.5, opacity: 1 }
-                : animationPhase === "intro" || animationPhase === "walking"
-                ? { x: -320, y: -120, rotate: 0, scale: 0.15, opacity: 0 }
-                : animationPhase === "throwing"
-                ? { x: -150, y: -30, rotate: 180, scale: 0.3, opacity: 1 }
-                : animationPhase === "spinning"
-                ? { x: 0, y: 60, rotate: 720, scale: 0.5, opacity: 1 }
-                : animationPhase === "landed"
-                ? { x: 0, y: 65, rotate: 722, scale: 0.5, opacity: 1 }
-                : { x: 0, y: 60, rotate: 720, scale: 0.5, opacity: 1 }
-            }
+            animate={{
+              x: hasPlayedIntro ? 0 :
+                 animationPhase === "intro" || animationPhase === "walking" ? -320 :
+                 animationPhase === "throwing" ? -150 :
+                 0,
+              y: hasPlayedIntro ? 60 :
+                 animationPhase === "intro" || animationPhase === "walking" ? -120 :
+                 animationPhase === "throwing" ? -30 :
+                 animationPhase === "landed" ? 65 :
+                 60,
+              rotate: hasPlayedIntro ? 720 :
+                      animationPhase === "intro" || animationPhase === "walking" ? 0 :
+                      animationPhase === "throwing" ? 180 :
+                      animationPhase === "landed" ? 722 :
+                      720,
+              scale: hasPlayedIntro ? 0.5 :
+                     animationPhase === "intro" || animationPhase === "walking" ? 0.15 :
+                     animationPhase === "throwing" ? 0.3 :
+                     0.5,
+              opacity: hasPlayedIntro ? 1 :
+                       animationPhase === "intro" || animationPhase === "walking" ? 0 : 1
+            }}
             transition={{
               duration: hasPlayedIntro ? 0 : animationPhase === "spinning" ? 1 : animationPhase === "landed" ? 0.15 : 0.4,
               ease: animationPhase === "landed" ? "easeOut" : [0.25, 0.46, 0.45, 0.94],
             }}
             className="relative"
           >
-            {/* Business Card */}
             <div 
               className="w-[520px] aspect-[1.75/1] bg-card border border-border relative overflow-hidden shadow-lg z-9"
               style={{ imageRendering: "auto" }}
@@ -714,7 +720,7 @@ function CardScene({ animationPhase, hasPlayedIntro, playClick }: { animationPha
         </div>
       </motion.div>
 
-      {/* Hint text */}
+      {/* Hint text shown after intro animation */}
       {animationPhase === "ready" && (
         <motion.p
           initial={{ opacity: 0 }}
@@ -728,8 +734,6 @@ function CardScene({ animationPhase, hasPlayedIntro, playClick }: { animationPha
     </motion.div>
   )
 }
-
-// ============ PROJECTS SCENE - Beach Bar with Mojito Glass ============
 
 // Ice cube positions inside the glass (in SVG viewBox coordinates)
 const ICE_CUBE_POSITIONS = [
@@ -749,6 +753,16 @@ const PLACEHOLDER_PROJECTS = [
   { id: 5, name: "Project Epsilon", description: "A security-focused authentication system with multi-factor authentication and encryption.", techStack: ["Go", "Redis", "Docker"], liveDemo: "https://example.com" },
 ]
 
+/**
+ * Renders the projects scene, which displays a list of projects as interactive ice cubes.
+ * @param {object} props - The component props.
+ * @param {Project[]} props.projects - The list of projects to display.
+ * @param {Project | null} props.selectedProject - The currently selected project.
+ * @param {(p: Project) => void} props.onSelectProject - Function to handle project selection.
+ * @param {() => void} props.onCloseProject - Function to handle closing the project view.
+ * @param {() => void} props.playClick - Function to play a click sound.
+ * @returns {JSX.Element} The projects scene component.
+ */
 function ProjectsScene({ 
   projects, 
   selectedProject, 
@@ -762,46 +776,38 @@ function ProjectsScene({
   onCloseProject: () => void
   playClick: () => void
 }) {
+  // State to track clicked and hovered ice cubes
   const [clickedCubes, setClickedCubes] = useState<Set<number>>(new Set())
   const [hoveredCube, setHoveredCube] = useState<number | null>(null)
   const [selectedCubeIndex, setSelectedCubeIndex] = useState<number | null>(null)
 
+  // Handle clicking on an ice cube
   const handleCubeClick = (index: number) => {
     playClick()
     setClickedCubes(prev => new Set(prev).add(index))
     setSelectedCubeIndex(index)
   }
 
-  const handleClosePopup = () => {
-    setSelectedCubeIndex(null)
-  }
-
-  // Get popup position based on ice cube position
+  // Get the position for the project details popup
   const getPopupPosition = (cubeIndex: number) => {
     const cube = ICE_CUBE_POSITIONS[cubeIndex]
-    // SVG viewBox is 80x150, rendered at 140x260
     const scaleY = 260 / 150
     const cubeRelativeY = cube.y * scaleY
-    
-    // Popup appears on SAME side as the ice cube
-    // Left cubes (isRight: false) = popup on left, arrow points right
-    // Right cubes (isRight: true) = popup on right, arrow points left
     const popupOnLeft = !cube.isRight
     
     return {
       relativeX: popupOnLeft ? -380 : 160,
       relativeY: cubeRelativeY - 100,
-      arrowPointsRight: popupOnLeft // Arrow points toward the cube
+      arrowPointsRight: popupOnLeft
     }
   }
 
-  // Render ice cube SVG - normal or cracked texture
+  // Render an ice cube SVG, with a cracked texture if it has been clicked
   const renderIceCube = (index: number, x: number, y: number, isClickable: boolean = true) => {
     const isClicked = clickedCubes.has(index)
     const isHovered = hoveredCube === index
     const isSelected = selectedCubeIndex === index
     
-    // Cracked ice cube texture
     if (isClicked) {
       return (
         <g 
@@ -811,34 +817,25 @@ function ProjectsScene({
           onMouseEnter={isClickable ? () => setHoveredCube(index) : undefined}
           onMouseLeave={isClickable ? () => setHoveredCube(null) : undefined}
         >
-          {/* Base cracked ice cube */}
           <polygon 
             points={`${x-10},${y} ${x},${y-7} ${x+10},${y} ${x+10},${y+14} ${x},${y+21} ${x-10},${y+14}`} 
             fill={isHovered || isSelected ? "#b8e8f0" : "#d8f0f0"} 
             stroke={isHovered || isSelected ? "#60a0b0" : "#90b8c0"} 
             strokeWidth="1.5" 
           />
-          {/* Left face with crack */}
           <polygon points={`${x-10},${y} ${x},${y-7} ${x},${y+7} ${x-10},${y+14}`} fill={isHovered || isSelected ? "#c8f0f8" : "#e8f8f8"} />
-          {/* Right face */}
           <polygon points={`${x},${y-7} ${x+10},${y} ${x+10},${y+14} ${x},${y+7}`} fill={isHovered || isSelected ? "#a0d8e8" : "#c8e8f0"} />
-          {/* Top face */}
           <polygon points={`${x-10},${y} ${x},${y-7} ${x+10},${y} ${x},${y+3}`} fill="#fff" opacity="0.7" />
-          
-          {/* Crack lines */}
           <line x1={x-6} y1={y+2} x2={x-2} y2={y+8} stroke="#70a0b0" strokeWidth="1" />
           <line x1={x-2} y1={y+8} x2={x+1} y2={y+5} stroke="#70a0b0" strokeWidth="1" />
           <line x1={x+1} y1={y+5} x2={x+4} y2={y+12} stroke="#70a0b0" strokeWidth="1" />
           <line x1={x-2} y1={y+8} x2={x-5} y2={y+13} stroke="#70a0b0" strokeWidth="0.8" />
           <line x1={x+3} y1={y-2} x2={x+6} y2={y+4} stroke="#70a0b0" strokeWidth="0.8" />
-          
-          {/* Number label */}
           <text x={x} y={y+12} textAnchor="middle" fill="#2a6a7a" fontSize="8" fontWeight="bold" fontFamily="monospace">{index + 1}</text>
         </g>
       )
     }
     
-    // Normal ice cube texture
     return (
       <g 
         key={index} 
@@ -856,15 +853,12 @@ function ProjectsScene({
         <polygon points={`${x-10},${y} ${x},${y-7} ${x},${y+7} ${x-10},${y+14}`} fill={isHovered ? "#d8f4fc" : "#f4fcfc"} />
         <polygon points={`${x},${y-7} ${x+10},${y} ${x+10},${y+14} ${x},${y+7}`} fill={isHovered ? "#b8e4f0" : "#dceef4"} />
         <polygon points={`${x-10},${y} ${x},${y-7} ${x+10},${y} ${x},${y+3}`} fill="#fff" opacity="0.85" />
-        {/* Shine */}
         <polygon points={`${x-7},${y+2} ${x-3},${y-2} ${x-3},${y+6} ${x-7},${y+10}`} fill="#fff" opacity="0.5" />
-        {/* Number label */}
         <text x={x} y={y+12} textAnchor="middle" fill={isHovered ? "#0a4a5a" : "#2a6a7a"} fontSize="8" fontWeight="bold" fontFamily="monospace">{index + 1}</text>
       </g>
     )
   }
 
-  // Base dimensions for positioning (1440x900)
   const BASE_W = 1440
   const BASE_H = 900
 
@@ -876,12 +870,9 @@ function ProjectsScene({
       className="w-full h-full relative overflow-hidden"
       style={{ width: BASE_W, height: BASE_H }}
     >
-      {/* FULL SUNSET BEACH BACKGROUND */}
+      {/* Background of the scene */}
       <div className="absolute inset-0" style={{ imageRendering: "pixelated" }}>
-        {/* Sky gradient - warm sunset */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#ff6b35] via-[#ff8c5a] to-[#ffb088]" />
-        
-        {/* Large sun */}
         <div className="absolute" style={{ top: 18, right: 216 }}>
           <svg width="180" height="180" viewBox="0 0 180 180">
             <circle cx="90" cy="90" r="60" fill="#ff4500" />
@@ -890,7 +881,7 @@ function ProjectsScene({
           </svg>
         </div>
 
-        {/* Clouds - fixed pixel positions */}
+        {/* Animated clouds */}
         {[{ x: 86, y: 90 }, { x: 461, y: 90 }, { x: 835, y: 90 }, { x: 1224, y: 90 }].map((pos, i) => (
           <motion.div
             key={i}
@@ -907,61 +898,49 @@ function ProjectsScene({
           </motion.div>
         ))}
 
-        {/* Ocean with depth perspective */}
+        {/* Ocean with wave effects */}
         <div className="absolute left-0 right-0 overflow-hidden" style={{ top: 270, height: 180 }}>
-  {/* Base ocean gradient - darker at top (distant), lighter closer */}
-  <div className="absolute inset-0 bg-gradient-to-b from-[#2563a3] via-[#3d8eb9] to-[#4da6cc]" />
-  {/* Wave layers with perspective scaling */}
-  <svg className="absolute inset-0 w-full h-full">
-    <defs>
-      {/* Distant waves (smaller, thinner) */}
-      <pattern id="waves1" patternUnits="userSpaceOnUse" width="150" height="15">
-        <path 
-          d="M0 7.5 Q37.5 4 75 7.5 Q112.5 11 150 7.5" 
-          stroke="#ffffff" 
-          strokeWidth="1.5" 
-          fill="none" 
-          opacity="0.15"
-        />
-      </pattern>
-      {/* Mid-distance waves */}
-      <pattern id="waves2" patternUnits="userSpaceOnUse" width="100" height="25">
-        <path 
-          d="M0 12.5 Q25 6 50 12.5 Q75 19 100 12.5" 
-          stroke="#a8d8ea" 
-          strokeWidth="2" 
-          fill="none" 
-          opacity="0.25"
-        />
-      </pattern>
-      {/* Close waves (larger, bolder) */}
-      <pattern id="waves3" patternUnits="userSpaceOnUse" width="80" height="35">
-        <path 
-          d="M0 17.5 Q20 8 40 17.5 Q60 27 80 17.5" 
-          stroke="#cce7f0" 
-          strokeWidth="3" 
-          fill="none" 
-          opacity="0.35"
-        />
-      </pattern>
-      
-    </defs>
-    {/* Apply wave patterns - top to bottom = far to near */}
-    {/* Distant waves at top */}
-    <rect width="100%" height="35%" fill="url(#waves1)" />
-    {/* Mid-distance waves */}
-    <rect width="100%" height="70%" y="15%" fill="url(#waves2)" />
-    {/* Close waves at bottom */}
-    <rect width="100%" height="50%" y="50%" fill="url(#waves3)" />
-    {/* Foam texture overlay */}
-    <rect width="100%" height="100%" fill="url(#foam)" opacity="0.3" />
-  </svg>
-  {/* Atmospheric haze at top (distant) */}
-  <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-[#7fb3d1]/30 to-transparent" style={{ height: 72 }} />
-  {/* Depth clarity at bottom (closer) */}
-  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-b from-transparent to-[#4da6cc]/20" style={{ height: 54 }} />
-</div>
-        {/* Beach sand with texture */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#2563a3] via-[#3d8eb9] to-[#4da6cc]" />
+          <svg className="absolute inset-0 w-full h-full">
+            <defs>
+              <pattern id="waves1" patternUnits="userSpaceOnUse" width="150" height="15">
+                <path 
+                  d="M0 7.5 Q37.5 4 75 7.5 Q112.5 11 150 7.5" 
+                  stroke="#ffffff" 
+                  strokeWidth="1.5" 
+                  fill="none" 
+                  opacity="0.15"
+                />
+              </pattern>
+              <pattern id="waves2" patternUnits="userSpaceOnUse" width="100" height="25">
+                <path 
+                  d="M0 12.5 Q25 6 50 12.5 Q75 19 100 12.5" 
+                  stroke="#a8d8ea" 
+                  strokeWidth="2" 
+                  fill="none" 
+                  opacity="0.25"
+                />
+              </pattern>
+              <pattern id="waves3" patternUnits="userSpaceOnUse" width="80" height="35">
+                <path 
+                  d="M0 17.5 Q20 8 40 17.5 Q60 27 80 17.5" 
+                  stroke="#cce7f0" 
+                  strokeWidth="3" 
+                  fill="none" 
+                  opacity="0.35"
+                />
+              </pattern>
+            </defs>
+            <rect width="100%" height="35%" fill="url(#waves1)" />
+            <rect width="100%" height="70%" y="15%" fill="url(#waves2)" />
+            <rect width="100%" height="50%" y="50%" fill="url(#waves3)" />
+            <rect width="100%" height="100%" fill="url(#foam)" opacity="0.3" />
+          </svg>
+          <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-[#7fb3d1]/30 to-transparent" style={{ height: 72 }} />
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-b from-transparent to-[#4da6cc]/20" style={{ height: 54 }} />
+        </div>
+
+        {/* Beach with sand texture and animated crab */}
         <div className="absolute left-0 right-0 bg-gradient-to-b from-[#f5d76e] to-[#d4a520]" style={{ top: 432, height: 378 }}>
           <svg className="absolute inset-0 w-full h-full opacity-25">
             <defs>
@@ -973,144 +952,98 @@ function ProjectsScene({
             </defs>
             <rect width="100%" height="100%" fill="url(#sandTex)" />
           </svg> 
-          {/* Cute animated crab - left side of beach */}
-<motion.div
-  className="absolute z-10"
-  style={{ left: 288, top: 50 }}
-  animate={{ 
-    x: [0, 20, 0, -15, 0],
-  }}
-  transition={{ 
-    duration: 8,
-    repeat: Infinity,
-    ease: "easeInOut"
-  }}
->
-  <svg width="50" height="40" viewBox="0 0 50 40">
-    {/* Crab body */}
-    <ellipse cx="25" cy="25" rx="12" ry="9" fill="#ff6347" />
-    <ellipse cx="25" cy="25" rx="10" ry="7" fill="#ff7f66" />
-    
-    {/* Eyes on stalks */}
-    <motion.g
-      animate={{ 
-        rotate: [0, -10, 10, 0],
-      }}
-      transition={{ 
-        duration: 2,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }}
-      style={{ transformOrigin: "20px 20px" }}
-    >
-      <line x1="20" y1="20" x2="20" y2="14" stroke="#ff6347" strokeWidth="2" />
-      <circle cx="20" cy="12" r="3" fill="#fff" />
-      <circle cx="20" cy="12" r="1.5" fill="#000" />
-    </motion.g>
-    
-    <motion.g
-      animate={{ 
-        rotate: [0, 10, -10, 0],
-      }}
-      transition={{ 
-        duration: 2,
-        repeat: Infinity,
-        ease: "easeInOut",
-        delay: 0.1
-      }}
-      style={{ transformOrigin: "30px 20px" }}
-    >
-      <line x1="30" y1="20" x2="30" y2="14" stroke="#ff6347" strokeWidth="2" />
-      <circle cx="30" cy="12" r="3" fill="#fff" />
-      <circle cx="30" cy="12" r="1.5" fill="#000" />
-    </motion.g>
-    
-    {/* Left claw */}
-    <motion.g
-      animate={{ 
-        rotate: [-15, -25, -15],
-      }}
-      transition={{ 
-        duration: 1.5,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }}
-      style={{ transformOrigin: "12px 24px" }}
-    >
-      <ellipse cx="8" cy="24" rx="5" ry="3" fill="#ff6347" transform="rotate(-20 8 24)" />
-      <path d="M 8 24 L 5 26 L 3 24 Z" fill="#ff6347" />
-      <path d="M 8 24 L 5 22 L 3 24 Z" fill="#ff4500" />
-    </motion.g>
-    
-    {/* Right claw */}
-    <motion.g
-      animate={{ 
-        rotate: [15, 25, 15],
-      }}
-      transition={{ 
-        duration: 1.5,
-        repeat: Infinity,
-        ease: "easeInOut",
-        delay: 0.75
-      }}
-      style={{ transformOrigin: "38px 24px" }}
-    >
-      <ellipse cx="42" cy="24" rx="5" ry="3" fill="#ff6347" transform="rotate(20 42 24)" />
-      <path d="M 42 24 L 45 26 L 47 24 Z" fill="#ff6347" />
-      <path d="M 42 24 L 45 22 L 47 24 Z" fill="#ff4500" />
-    </motion.g>
-    
-    {/* Legs - left side */}
-    <motion.line 
-      x1="18" y1="30" x2="15" y2="36" 
-      stroke="#ff6347" 
-      strokeWidth="2"
-      animate={{ x2: [15, 13, 15] }}
-      transition={{ duration: 0.8, repeat: Infinity, delay: 0 }}
-    />
-    <motion.line 
-      x1="20" y1="31" x2="17" y2="37" 
-      stroke="#ff6347" 
-      strokeWidth="2"
-      animate={{ x2: [17, 15, 17] }}
-      transition={{ duration: 0.8, repeat: Infinity, delay: 0.2 }}
-    />
-    <motion.line 
-      x1="22" y1="32" x2="20" y2="38" 
-      stroke="#ff6347" 
-      strokeWidth="2"
-      animate={{ x2: [20, 18, 20] }}
-      transition={{ duration: 0.8, repeat: Infinity, delay: 0.4 }}
-    />
-    
-    {/* Legs - right side */}
-    <motion.line 
-      x1="32" y1="30" x2="35" y2="36" 
-      stroke="#ff6347" 
-      strokeWidth="2"
-      animate={{ x2: [35, 37, 35] }}
-      transition={{ duration: 0.8, repeat: Infinity, delay: 0.1 }}
-    />
-    <motion.line 
-      x1="30" y1="31" x2="33" y2="37" 
-      stroke="#ff6347" 
-      strokeWidth="2"
-      animate={{ x2: [33, 35, 33] }}
-      transition={{ duration: 0.8, repeat: Infinity, delay: 0.3 }}
-    />
-    <motion.line 
-      x1="28" y1="32" x2="30" y2="38" 
-      stroke="#ff6347" 
-      strokeWidth="2"
-      animate={{ x2: [30, 32, 30] }}
-      transition={{ duration: 0.8, repeat: Infinity, delay: 0.5 }}
-    />
-    
-    {/* Mouth */}
-    <path d="M 22 27 Q 25 29 28 27" stroke="#000" strokeWidth="0.5" fill="none" />
-  </svg>
-</motion.div>
-          {/* Beach ball decoration */}
+          <motion.div
+            className="absolute z-10"
+            style={{ left: 288, top: 50 }}
+            animate={{ x: [0, 20, 0, -15, 0] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <svg width="50" height="40" viewBox="0 0 50 40">
+              <ellipse cx="25" cy="25" rx="12" ry="9" fill="#ff6347" />
+              <ellipse cx="25" cy="25" rx="10" ry="7" fill="#ff7f66" />
+              <motion.g
+                animate={{ rotate: [0, -10, 10, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                style={{ transformOrigin: "20px 20px" }}
+              >
+                <line x1="20" y1="20" x2="20" y2="14" stroke="#ff6347" strokeWidth="2" />
+                <circle cx="20" cy="12" r="3" fill="#fff" />
+                <circle cx="20" cy="12" r="1.5" fill="#000" />
+              </motion.g>
+              <motion.g
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.1 }}
+                style={{ transformOrigin: "30px 20px" }}
+              >
+                <line x1="30" y1="20" x2="30" y2="14" stroke="#ff6347" strokeWidth="2" />
+                <circle cx="30" cy="12" r="3" fill="#fff" />
+                <circle cx="30" cy="12" r="1.5" fill="#000" />
+              </motion.g>
+              <motion.g
+                animate={{ rotate: [-15, -25, -15] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                style={{ transformOrigin: "12px 24px" }}
+              >
+                <ellipse cx="8" cy="24" rx="5" ry="3" fill="#ff6347" transform="rotate(-20 8 24)" />
+                <path d="M 8 24 L 5 26 L 3 24 Z" fill="#ff6347" />
+                <path d="M 8 24 L 5 22 L 3 24 Z" fill="#ff4500" />
+              </motion.g>
+              <motion.g
+                animate={{ rotate: [15, 25, 15] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.75 }}
+                style={{ transformOrigin: "38px 24px" }}
+              >
+                <ellipse cx="42" cy="24" rx="5" ry="3" fill="#ff6347" transform="rotate(20 42 24)" />
+                <path d="M 42 24 L 45 26 L 47 24 Z" fill="#ff6347" />
+                <path d="M 42 24 L 45 22 L 47 24 Z" fill="#ff4500" />
+              </motion.g>
+              <motion.line 
+                x1="18" y1="30" x2="15" y2="36" 
+                stroke="#ff6347" 
+                strokeWidth="2"
+                animate={{ x2: [15, 13, 15] }}
+                transition={{ duration: 0.8, repeat: Infinity, delay: 0 }}
+              />
+              <motion.line 
+                x1="20" y1="31" x2="17" y2="37" 
+                stroke="#ff6347" 
+                strokeWidth="2"
+                animate={{ x2: [17, 15, 17] }}
+                transition={{ duration: 0.8, repeat: Infinity, delay: 0.2 }}
+              />
+              <motion.line 
+                x1="22" y1="32" x2="20" y2="38" 
+                stroke="#ff6347" 
+                strokeWidth="2"
+                animate={{ x2: [20, 18, 20] }}
+                transition={{ duration: 0.8, repeat: Infinity, delay: 0.4 }}
+              />
+              <motion.line 
+                x1="32" y1="30" x2="35" y2="36" 
+                stroke="#ff6347" 
+                strokeWidth="2"
+                animate={{ x2: [35, 37, 35] }}
+                transition={{ duration: 0.8, repeat: Infinity, delay: 0.1 }}
+              />
+              <motion.line 
+                x1="30" y1="31" x2="33" y2="37" 
+                stroke="#ff6347" 
+                strokeWidth="2"
+                animate={{ x2: [33, 35, 33] }}
+                transition={{ duration: 0.8, repeat: Infinity, delay: 0.3 }}
+              />
+              <motion.line 
+                x1="28" y1="32" x2="30" y2="38" 
+                stroke="#ff6347" 
+                strokeWidth="2"
+                animate={{ x2: [30, 32, 30] }}
+                transition={{ duration: 0.8, repeat: Infinity, delay: 0.5 }}
+              />
+              <path d="M 22 27 Q 25 29 28 27" stroke="#000" strokeWidth="0.5" fill="none" />
+            </svg>
+          </motion.div>
+
+          {/* Beach ball */}
           <motion.div
             className="absolute"
             style={{ left: 1152, top: 60 }}
@@ -1132,7 +1065,6 @@ function ProjectsScene({
         </div>
 
         {/* Palm trees */}
-        {/* Palm trees - fixed pixel positions */}
         {[{ x: 29, s: 0.85 }, { x: 173, s: 1.05 }, { x: 1210, s: 0.85 }, { x: 1368, s: 1.05 }].map((tree, i) => (
           <motion.div
             key={i}
@@ -1151,7 +1083,7 @@ function ProjectsScene({
           </motion.div>
         ))}
 
-        {/* WOODEN BAR COUNTER */}
+        {/* Bar counter */}
         <div className="absolute left-0 right-0" style={{ bottom: -90, height: 378 }}>
           <svg className="absolute bottom-0 w-full h-full" viewBox="0 0 1200 400" preserveAspectRatio="none">
             <rect x="0" y="10" width="2400" height="80" fill="#cd853f" />
@@ -1170,203 +1102,167 @@ function ProjectsScene({
         </div>
       </div>
 
-      {/* Instruction text */}
-      <div className="absolute z-10" style={{ top: 45, left: 720, transform: "translateX(-50%)" }}>
-        
-      </div>
-
-      {/* Mojito Glass Container - Centered */}
+      {/* Mojito glass with interactive ice cubes */}
       <div
         className="absolute z-10 left-1/2 -translate-x-1/2"
         style={{ top: '410px' }}
       >
         <svg width="140" height="260" viewBox="0 0 80 150">
-  <defs>
-    <linearGradient id="mojitoLiquid" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stopColor="#7FD67F" stopOpacity="0.75" />
-      <stop offset="100%" stopColor="#5FB85F" stopOpacity="0.9" />
-    </linearGradient>
-    <clipPath id="glassClip">
-      <polygon points="12,22 68,22 63,145 17,145" />
-    </clipPath>
-  </defs>
-  
-  {/* Glass outline */}
-  <polygon points="10,20 70,20 65,148 15,148" fill="#fff" opacity="0.3" stroke="#fff" strokeWidth="2" />
-  
-  {/* Liquid */}
-  <rect x="12" y="22" width="56" height="123" fill="url(#mojitoLiquid)" clipPath="url(#glassClip)" />
-  
- {/* Straw - MOVED HERE (behind ice cubes) */}
-<rect x="52" y="-15" width="7" height="150" fill="#ff6b6b" rx="1" />
-<rect x="52" y="-15" width="3" height="150" fill="#ff8787" rx="1" />
-  
-  {/* Ice cubes inside glass with bobbing animation */}
-  {ICE_CUBE_POSITIONS.map((pos, i) => {
-    return (
-      <motion.g
-        key={i}
-        animate={{ 
-          y: [0, -3, 0, 2, 0],
-        }}
-        transition={{ 
-          duration: 3 + i * 0.3,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: i * 0.4
-        }}
-      >
-        {renderIceCube(i, pos.x, pos.y)}
-      </motion.g>
-    )
-  })}
-  
-  {/* Mint leaves */}
-  <ellipse cx="26" cy="26" rx="9" ry="5" fill="#228b22" transform="rotate(-15 26 26)" />
-  <ellipse cx="40" cy="22" rx="11" ry="6" fill="#2e8b2e" transform="rotate(8 40 22)" />
-  <ellipse cx="56" cy="26" rx="8" ry="4" fill="#228b22" />
-  
-  {/* LIME - moved before straw so it appears behind */}
-{/* Lime slice on rim - more realistic */}
-<g transform="translate(64, 18)">
-  {/* Outer rind */}
-  <circle cx="0" cy="0" r="12" fill="#32cd32" stroke="#228b22" strokeWidth="2" />
-  {/* Inner flesh */}
-  <circle cx="0" cy="0" r="9" fill="#90EE90" />
-  {/* Segments */}
-  <line x1="0" y1="-9" x2="0" y2="9" stroke="#228b22" strokeWidth="1" opacity="0.4" />
-  <line x1="-9" y1="0" x2="9" y2="0" stroke="#228b22" strokeWidth="1" opacity="0.4" />
-  <line x1="-6" y1="-6" x2="6" y2="6" stroke="#228b22" strokeWidth="1" opacity="0.4" />
-  <line x1="-6" y1="6" x2="6" y2="-6" stroke="#228b22" strokeWidth="1" opacity="0.4" />
-  {/* Center pulp */}
-  <circle cx="0" cy="0" r="2" fill="#fff" opacity="0.6" />
-</g>
+          <defs>
+            <linearGradient id="mojitoLiquid" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#7FD67F" stopOpacity="0.75" />
+              <stop offset="100%" stopColor="#5FB85F" stopOpacity="0.9" />
+            </linearGradient>
+            <clipPath id="glassClip">
+              <polygon points="12,22 68,22 63,145 17,145" />
+            </clipPath>
+          </defs>
+          
+          <polygon points="10,20 70,20 65,148 15,148" fill="#fff" opacity="0.3" stroke="#fff" strokeWidth="2" />
+          <rect x="12" y="22" width="56" height="123" fill="url(#mojitoLiquid)" clipPath="url(#glassClip)" />
+          <rect x="52" y="-15" width="7" height="150" fill="#ff6b6b" rx="1" />
+          <rect x="52" y="-15" width="3" height="150" fill="#ff8787" rx="1" />
+          
+          {/* Animated ice cubes */}
+          {ICE_CUBE_POSITIONS.map((pos, i) => (
+            <motion.g
+              key={i}
+              animate={{ y: [0, -3, 0, 2, 0] }}
+              transition={{ 
+                duration: 3 + i * 0.3,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: i * 0.4
+              }}
+            >
+              {renderIceCube(i, pos.x, pos.y)}
+            </motion.g>
+          ))}
+          
+          <ellipse cx="26" cy="26" rx="9" ry="5" fill="#228b22" transform="rotate(-15 26 26)" />
+          <ellipse cx="40" cy="22" rx="11" ry="6" fill="#2e8b2e" transform="rotate(8 40 22)" />
+          <ellipse cx="56" cy="26" rx="8" ry="4" fill="#228b22" />
+          
+          <g transform="translate(64, 18)">
+            <circle cx="0" cy="0" r="12" fill="#32cd32" stroke="#228b22" strokeWidth="2" />
+            <circle cx="0" cy="0" r="9" fill="#90EE90" />
+            <line x1="0" y1="-9" x2="0" y2="9" stroke="#228b22" strokeWidth="1" opacity="0.4" />
+            <line x1="-9" y1="0" x2="9" y2="0" stroke="#228b22" strokeWidth="1" opacity="0.4" />
+            <line x1="-6" y1="-6" x2="6" y2="6" stroke="#228b22" strokeWidth="1" opacity="0.4" />
+            <line x1="-6" y1="6" x2="6" y2="-6" stroke="#228b22" strokeWidth="1" opacity="0.4" />
+            <circle cx="0" cy="0" r="2" fill="#fff" opacity="0.6" />
+          </g>
+        </svg>
 
-{/* Straw - NOW APPEARS IN FRONT */}
-
-
-</svg>
-
-     {/* Glassmorphism Popup - positioned relative to glass */}
-<AnimatePresence>
-  {selectedCubeIndex !== null && (
-    <motion.div
-  key="project-popup" // Keep a static key so it doesn't remount on every click
-  initial={false}     // This removes the "less opaque to more opaque" start
-  animate={{ opacity: 1, scale: 1 }}
-  exit={{ opacity: 0, scale: 0.9 }}
-  className="absolute z-50"
-  style={{
-    left: getPopupPosition(selectedCubeIndex).relativeX,
-    top: getPopupPosition(selectedCubeIndex).relativeY,
-    width: '360px',
-  }}
->
-      {/* Glassmorphism card - white base */}
-      <div 
-        className="relative rounded-2xl p-6 border border-white/60"
-        style={{
-          background: 'rgba(255, 255, 255, 0.55)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255,255,255,0.7)',
-        }}
-      >
-        {/* Arrow/tail indicator pointing to ice cube */}
-        <div 
-          className="absolute"
-          style={{
-            top: 100,
-            ...(getPopupPosition(selectedCubeIndex).arrowPointsRight ? {
-              right: '-16px',
-              width: 0,
-              height: 0,
-              borderTop: '16px solid transparent',
-              borderBottom: '16px solid transparent',
-              borderLeft: '16px solid rgba(255, 255, 255, 0.55)',
-            } : {
-              left: '-16px',
-              width: 0,
-              height: 0,
-              borderTop: '16px solid transparent',
-              borderBottom: '16px solid transparent',
-              borderRight: '16px solid rgba(255, 255, 255, 0.55)',
-            })
-          }}
-        />
-
-        {/* Conditional content based on project index */}
-        {selectedCubeIndex > 0 ? (
-          /* For projects 2-5: Show ONLY "Coming Soon" with same spacing */
-          <div className="space-y-4">
-            <div className="flex items-center justify-center py-12">
-              <div className="text-center px-6">
-                <div className="text-7xl mb-4">🚧</div>
-                <p className="text-gray-800 font-bold text-xl mb-2">Coming Soon</p>
-                <p className="text-gray-600 text-base">This project is under development</p>
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* For project 1: Show full content */
-          <div className="space-y-4">
-            <h3 className="text-gray-900 font-bold text-2xl pr-8">
-              {PLACEHOLDER_PROJECTS[selectedCubeIndex]?.name || `Project ${selectedCubeIndex + 1}`}
-            </h3>
-            
-            <p className="text-gray-700 text-base leading-relaxed">
-              {PLACEHOLDER_PROJECTS[selectedCubeIndex]?.description || "Project description placeholder"}
-            </p>
-            
-            {/* Tech stack tags */}
-            <div className="flex flex-wrap gap-2">
-              {(PLACEHOLDER_PROJECTS[selectedCubeIndex]?.techStack || ["Tech 1", "Tech 2"]).map((tech, i) => (
-                <span 
-                  key={i}
-                  className="px-3 py-1 rounded-full text-sm font-medium bg-white/40 text-gray-800 border border-white/50"
-                >
-                  {tech}
-                </span>
-              ))}
-            </div>
-
-            {/* Live demo link - Mojito green CTA */}
-            {PLACEHOLDER_PROJECTS[selectedCubeIndex]?.liveDemo && (
-              <a 
-                href={PLACEHOLDER_PROJECTS[selectedCubeIndex].liveDemo}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => playClick()}
-                className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-xl text-white text-base font-semibold transition-all"
+        {/* Project details popup */}
+        <AnimatePresence>
+          {selectedCubeIndex !== null && (
+            <motion.div
+              key="project-popup"
+              initial={false}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="absolute z-50"
+              style={{
+                left: getPopupPosition(selectedCubeIndex).relativeX,
+                top: getPopupPosition(selectedCubeIndex).relativeY,
+                width: '360px',
+              }}
+            >
+              <div 
+                className="relative rounded-2xl p-6 border border-white/60"
                 style={{
-                  background: '#5FB85F',
-                  boxShadow: '0 4px 12px rgba(95, 184, 95, 0.35)',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background = '#7FD67F'
-                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(127, 214, 127, 0.45)'
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background = '#5FB85F'
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(95, 184, 95, 0.35)'
+                  background: 'rgba(255, 255, 255, 0.55)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
+                  boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255,255,255,0.7)',
                 }}
               >
-                <Monitor size={18} />
-                View Live Demo
-              </a>
-            )}
-          </div>
-        )}
-      </div>
-    </motion.div>
-  )}
-</AnimatePresence>
+                <div 
+                  className="absolute"
+                  style={{
+                    top: 100,
+                    ...(getPopupPosition(selectedCubeIndex).arrowPointsRight ? {
+                      right: '-16px',
+                      width: 0,
+                      height: 0,
+                      borderTop: '16px solid transparent',
+                      borderBottom: '16px solid transparent',
+                      borderLeft: '16px solid rgba(255, 255, 255, 0.55)',
+                    } : {
+                      left: '-16px',
+                      width: 0,
+                      height: 0,
+                      borderTop: '16px solid transparent',
+                      borderBottom: '16px solid transparent',
+                      borderRight: '16px solid rgba(255, 255, 255, 0.55)',
+                    })
+                  }}
+                />
+
+                {selectedCubeIndex > 0 ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-center py-12">
+                      <div className="text-center px-6">
+                        <div className="text-7xl mb-4">🚧</div>
+                        <p className="text-gray-800 font-bold text-xl mb-2">Coming Soon</p>
+                        <p className="text-gray-600 text-base">This project is under development</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <h3 className="text-gray-900 font-bold text-2xl pr-8">
+                      {PLACEHOLDER_PROJECTS[selectedCubeIndex]?.name || `Project ${selectedCubeIndex + 1}`}
+                    </h3>
+                    <p className="text-gray-700 text-base leading-relaxed">
+                      {PLACEHOLDER_PROJECTS[selectedCubeIndex]?.description || "Project description placeholder"}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {(PLACEHOLDER_PROJECTS[selectedCubeIndex]?.techStack || ["Tech 1", "Tech 2"]).map((tech, i) => (
+                        <span 
+                          key={i}
+                          className="px-3 py-1 rounded-full text-sm font-medium bg-white/40 text-gray-800 border border-white/50"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                    {PLACEHOLDER_PROJECTS[selectedCubeIndex]?.liveDemo && (
+                      <a 
+                        href={PLACEHOLDER_PROJECTS[selectedCubeIndex].liveDemo}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => playClick()}
+                        className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-xl text-white text-base font-semibold transition-all"
+                        style={{
+                          background: '#5FB85F',
+                          boxShadow: '0 4px 12px rgba(95, 184, 95, 0.35)',
+                        }}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.background = '#7FD67F'
+                          e.currentTarget.style.boxShadow = '0 4px 16px rgba(127, 214, 127, 0.45)'
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.background = '#5FB85F'
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(95, 184, 95, 0.35)'
+                        }}
+                      >
+                        <Monitor size={18} />
+                        View Live Demo
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   )
 }
 
-// ============ TECHNOLOGIES SCENE - Park Canvas with Location-based Skills ============
 interface SkillCategory {
   name: string
   color: string
@@ -1384,6 +1280,13 @@ const skillZones = [
   { id: "red", color: "#a12828", skills: "Linux", zone: { x: 200, y: 260, w: 180, h: 80 } },
 ]
 
+/**
+ * Renders the technologies scene, which displays a grid of skills.
+ * @param {object} props - The component props.
+ * @param {Array<object>} props.skills - The list of skills to display.
+ * @param {() => void} props.playClick - Function to play a click sound.
+ * @returns {JSX.Element} The technologies scene component.
+ */
 function TechnologiesScene({ skills, playClick }: { skills: SkillCategory[], playClick: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [selectedColor, setSelectedColor] = useState("violet")
@@ -1837,7 +1740,20 @@ className="border-4 border-[#8b4513]"
 </motion.div> 
 )
 }
-// ============ ABOUT SCENE - Modern Room with City View ============
+/**
+ * Renders the about scene, which displays information in a fake Safari window.
+ * @param {object} props - The component props.
+ * @param {object} props.aboutData - The data to display in the about section.
+ * @param {() => void} props.playClick - Function to play a click sound.
+ * @returns {JSX.Element} The about scene component.
+ */
+/**
+ * Renders the about scene, which displays information in a fake Safari window.
+ * @param {object} props - The component props.
+ * @param {object} props.aboutData - The data to display in the about section.
+ * @param {() => void} props.playClick - Function to play a click sound.
+ * @returns {JSX.Element} The about scene component.
+ */
 function AboutScene({ aboutData, playClick }: { aboutData: any, playClick: () => void }) {
   const [showBrowser, setShowBrowser] = useState(false)
   const [activeTab, setActiveTab] = useState<"background" | "hobbies" | "goals">("background")

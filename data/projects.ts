@@ -1,3 +1,5 @@
+// This file contains the data for the projects displayed in the portfolio.
+
 interface Project {
   id: number
   name: string

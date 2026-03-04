@@ -1,3 +1,5 @@
+// This file contains the data for the skills displayed in the interactive 'painting' scene.
+
 interface SkillCategory {
   name: string
   color: string
