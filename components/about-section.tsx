@@ -119,23 +119,7 @@ export function AboutSection({ aboutData }: AboutSectionProps) {
             {/* Items on the desk */}
             <div className="relative bg-[#a0522d] border-x-2 border-b-2 border-[#6b3510] p-8 flex justify-center items-end gap-8">
               
-              {/* Animated lamp */}
-              <div className="absolute left-8 bottom-6">
-                <motion.div
-                  animate={{ 
-                    boxShadow: ["0 0 20px 10px rgba(255,215,0,0.3)", "0 0 30px 15px rgba(255,215,0,0.4)", "0 0 20px 10px rgba(255,215,0,0.3)"]
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="relative"
-                >
-                  <svg width="50" height="80" viewBox="0 0 50 80" style={{ imageRendering: "pixelated" }}>
-                    <polygon points="10,0 40,0 45,30 5,30" fill="#ffd700" />
-                    <ellipse cx="25" cy="30" rx="15" ry="5" fill="#fff8dc" opacity="0.5" />
-                    <rect x="22" y="30" width="6" height="35" fill="#2a2520" />
-                    <ellipse cx="25" cy="70" rx="15" ry="5" fill="#2a2520" />
-                  </svg>
-                </motion.div>
-              </div>
+            
               
               {/* Clickable computer monitor */}
               <motion.div
