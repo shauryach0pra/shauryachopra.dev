@@ -69,10 +69,10 @@
   --button-border: oklch(0.80 0.005 90);
   --button-text: oklch(0.15 0.01 30);
   
-  /* Modal dialog colors */
-  --modal: oklch(0.95 0.005 90);
-  --modal-header: oklch(0.15 0.01 30);
-  --modal-border: oklch(0.85 0.005 90);
+  /* pop up dialog colors */
+  --pop up: oklch(0.95 0.005 90);
+  --pop up-header: oklch(0.15 0.01 30);
+  --pop up-border: oklch(0.85 0.005 90);
   
   /* macOS-style browser window colors */
   --browser-bg: oklch(0.18 0.005 260);
@@ -202,9 +202,9 @@
   --color-button-hover: var(--button-hover);
   --color-button-border: var(--button-border);
   --color-button-text: var(--button-text);
-  --color-modal: var(--modal);
-  --color-modal-header: var(--modal-header);
-  --color-modal-border: var(--modal-border);
+  --color-pop up: var(--pop up);
+  --color-pop up-header: var(--pop up-header);
+  --color-pop up-border: var(--pop up-border);
   /* Browser */
   --color-browser-bg: var(--browser-bg);
   --color-browser-toolbar: var(--browser-toolbar);

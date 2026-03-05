@@ -36,17 +36,17 @@ interface AboutSectionProps {
 
 /**
  * Renders the About section of the portfolio.
- * This component displays a pixel-art room with a clickable computer that opens a modal with more information.
+ * This component displays a pixel-art room with a clickable computer that opens a pop up with more information.
  * @param {AboutSectionProps} props - The props for the component.
  * @returns {JSX.Element} The AboutSection component.
  */
 export function AboutSection({ aboutData }: AboutSectionProps) {
-  // State to manage the visibility of the browser modal
+  // State to manage the visibility of the browser pop up
   const [showBrowser, setShowBrowser] = useState(false)
-  // State to manage the active tab in the browser modal
+  // State to manage the active tab in the browser pop up
   const [activeTab, setActiveTab] = useState<"background" | "interests" | "goals">("background")
 
-  // Define the tabs for the browser modal
+  // Define the tabs for the browser pop up
   const tabs = [
     { id: "background" as const, label: "Background" },
     { id: "interests" as const, label: "Interests" },
@@ -221,7 +221,7 @@ export function AboutSection({ aboutData }: AboutSectionProps) {
         </motion.div>
       </div>
       
-      {/* Browser modal that appears on computer click */}
+      {/* Browser pop up that appears on computer click */}
       <AnimatePresence>
         {showBrowser && (
           <>

@@ -14,25 +14,25 @@ interface Project {
   liveDemo: string
 }
 
-// Define the props for the ProjectModal component
-interface ProjectModalProps {
+// Define the props for the Projectpop up component
+interface Projectpop upProps {
   project: Project | null
   onClose: () => void
 }
 
 /**
- * Renders a modal to display the details of a project.
- * @param {ProjectModalProps} props - The props for the component.
- * @returns {JSX.Element | null} The ProjectModal component, or null if no project is selected.
+ * Renders a pop up to display the details of a project.
+ * @param {Projectpop upProps} props - The props for the component.
+ * @returns {JSX.Element | null} The Projectpop up component, or null if no project is selected.
  */
-export function ProjectModal({ project, onClose }: ProjectModalProps) {
+export function Projectpop up({ project, onClose }: Projectpop upProps) {
   if (!project) return null
 
   return (
     <AnimatePresence>
       {project && (
         <>
-          {/* Backdrop for the modal */}
+          {/* Backdrop for the pop up */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -41,7 +41,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
             className="fixed inset-0 bg-black/50 z-50 pixel-cursor"
           />
           
-          {/* The modal itself */}
+          {/* The pop up itself */}
           <motion.div
             initial={{ scale: 0.8, opacity: 0, y: 50 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -49,9 +49,9 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
             transition={{ type: "spring", stiffness: 200, damping: 20 }}
             className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90vw] max-w-[600px] max-h-[80vh] overflow-y-auto"
           >
-            {/* Pixel-art style frame for the modal */}
+            {/* Pixel-art style frame for the pop up */}
             <div className="bg-[#f5f2e8] border-4 border-[#2a2520] shadow-[8px_8px_0px_0px_#2a2520]">
-              {/* Modal header with title and close button */}
+              {/* pop up header with title and close button */}
               <div className="bg-[#2a2520] text-[#f5f2e8] px-4 py-2 flex items-center justify-between">
                 <span className="font-[var(--font-pixel)] text-xs">
                   project.exe
@@ -64,7 +64,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
                 </button>
               </div>
               
-              {/* Modal content */}
+              {/* pop up content */}
               <div className="p-6 space-y-6">
                 {/* Project name */}
                 <h2 className="font-[var(--font-pixel)] text-lg text-[#2a2520]">
