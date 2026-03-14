@@ -1200,7 +1200,7 @@ function ProjectsScene({
                   }}
                 />
 
-                {selectedCubeIndex > 0 ? (
+                {!PLACEHOLDER_PROJECTS[selectedCubeIndex] ? (
                   <div className="space-y-4">
                     <div className="flex items-center justify-center py-12">
                       <div className="text-center px-6">
