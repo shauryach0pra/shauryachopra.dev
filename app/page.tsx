@@ -748,7 +748,7 @@ const ICE_CUBE_POSITIONS = [
 const PLACEHOLDER_PROJECTS = [
   { id: 1, name: "Fakebook", description: "Simulates an OTP grabbing attack using social engineering techniques", techStack: ["Next.js", "Typescript", "Tailwind CSS"], liveDemo: "https://shauryachopra.dev/fakebook" },
   { id: 2, name: "KeyMatch", description: "An AI powered piano settings finder that recommends 3 presets for any song.", techStack: ["Grok AI", "HTML", "CSS"], liveDemo: "https://shauryachopra.dev/keymatch" },
-  { id: 3, name: "Project Gamma", description: "A robust backend system handling millions of requests with high availability and fault tolerance.", techStack: ["Python", "FastAPI", "PostgreSQL"], liveDemo: "https://example.com" },
+  { id: 3, name: "The Council", description: "Ask any question and get funny conflicting answers from 4 AI-powered legendary figures, from Socrates to Gordon Ramsay.", techStack: ["Grok AI", "HTML", "CSS"], liveDemo: "https://shauryachopra.dev/thecouncil" },
   { id: 4, name: "Project Delta", description: "Machine learning powered analytics dashboard providing actionable insights from complex data.", techStack: ["TensorFlow", "React", "D3.js"], liveDemo: "https://example.com" },
   { id: 5, name: "Project Epsilon", description: "A security-focused authentication system with multi-factor authentication and encryption.", techStack: ["Go", "Redis", "Docker"], liveDemo: "https://example.com" },
 ]
@@ -1200,7 +1200,7 @@ function ProjectsScene({
                   }}
                 />
 
-                {!PLACEHOLDER_PROJECTS[selectedCubeIndex] ? (
+                {!PLACEHOLDER_PROJECTS[selectedCubeIndex] || !PLACEHOLDER_PROJECTS[selectedCubeIndex].name ? (
                   <div className="space-y-4">
                     <div className="flex items-center justify-center py-12">
                       <div className="text-center px-6">
