@@ -1200,7 +1200,7 @@ function ProjectsScene({
                   }}
                 />
 
-                {selectedCubeIndex >= PLACEHOLDER_PROJECTS.length ? (
+                {selectedCubeIndex === 4 ? (
                   <div className="space-y-4">
                     <div className="flex items-center justify-center py-12">
                       <div className="text-center px-6">
