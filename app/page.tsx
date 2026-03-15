@@ -746,10 +746,10 @@ const ICE_CUBE_POSITIONS = [
 
 // Placeholder project data for 5 ice cubes
 const PLACEHOLDER_PROJECTS = [
-  { id: 1, name: "Fakebook", description: "Simulates an OTP grabbing attack using social engineering techniques", techStack: ["Next.js", "Typescript", "Tailwind CSS"], liveDemo: "https://shauryachopra.dev/fakebook" },
-  { id: 2, name: "KeyMatch", description: "An AI powered piano settings finder that recommends 3 presets for any song.", techStack: ["Grok AI", "HTML", "CSS"], liveDemo: "https://shauryachopra.dev/keymatch" },
-  { id: 3, name: "The Council", description: "Ask any question and get funny conflicting answers from 4 AI-powered legendary figures from Socrates to Gordon Ramsay", techStack: ["Grok AI", "HTML", "CSS"], liveDemo: "https://shauryachopra.dev/thecouncil" },
-  { id: 4, name: "Project Delta", description: "Machine learning powered analytics dashboard providing actionable insights from complex data.", techStack: ["TensorFlow", "React", "D3.js"], liveDemo: "https://example.com" },
+  { id: 1, name: "Fakebook", description: "Simulates an OTP grabbing attack using social engineering techniques.", techStack: ["Next.js", "Typescript", "Tailwind CSS"], liveDemo: "https://shauryachopra.dev/fakebook" },
+  { id: 2, name: "KeyMatch", description: "A piano settings finder that recommends 3 presets for any song", techStack: ["Groq API", "HTML", "CSS"], liveDemo: "https://shauryachopra.dev/keymatch" },
+  { id: 3, name: "The Council", description: "Ask any question and get witty answers from 4 legendary figures from Socrates to Gordon Ramsay", techStack: ["Groq API", "HTML", "CSS"], liveDemo: "https://shauryachopra.dev/thecouncil" },
+  { id: 4, name: "WikiHole", description: "An interactive knowledge graph that reveals surprising connections between any 2 topics or find unexpected paths bridging two worlds", techStack: ["Groq API", "Vanilla JS", "HTML"], liveDemo: "https://shauryachopra.dev/wikihole" },
   { id: 5, name: "Project Epsilon", description: "A security-focused authentication system with multi-factor authentication and encryption.", techStack: ["Go", "Redis", "Docker"], liveDemo: "https://example.com" },
 ]
 
@@ -1200,7 +1200,7 @@ function ProjectsScene({
                   }}
                 />
 
-                {!PLACEHOLDER_PROJECTS[selectedCubeIndex] || !PLACEHOLDER_PROJECTS[selectedCubeIndex].name ? (
+                {selectedCubeIndex >= PLACEHOLDER_PROJECTS.length ? (
                   <div className="space-y-4">
                     <div className="flex items-center justify-center py-12">
                       <div className="text-center px-6">
