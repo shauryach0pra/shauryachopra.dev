@@ -1200,18 +1200,7 @@ function ProjectsScene({
                   }}
                 />
 
-                {selectedCubeIndex === 4 ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-center py-12">
-                      <div className="text-center px-6">
-                        <div className="text-7xl mb-4">🚧</div>
-                        <p className="text-gray-800 font-bold text-xl mb-2">Coming Soon</p>
-                        <p className="text-gray-600 text-base">This project is under development</p>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
+                <div className="space-y-4">
                     <h3 className="text-gray-900 font-bold text-2xl pr-8">
                       {PLACEHOLDER_PROJECTS[selectedCubeIndex]?.name || `Project ${selectedCubeIndex + 1}`}
                     </h3>
@@ -1253,7 +1242,6 @@ function ProjectsScene({
                       </a>
                     )}
                   </div>
-                )}
               </div>
             </motion.div>
           )}
