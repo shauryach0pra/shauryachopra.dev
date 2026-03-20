@@ -35,9 +35,8 @@ interface Project {
  * @returns {JSX.Element} The responsive wrapper component.
  */
 function ResponsiveWrapper({ children }: { children: React.ReactNode }) {
-  // State to hold the calculated scale and vertical offset
+  // State to hold the calculated scale
   const [scale, setScale] = useState(1)
-  const [vOffset, setVOffset] = useState(0)
   
   // Base dimensions for the portfolio layout
   const BASE_WIDTH = 1440
@@ -45,34 +44,16 @@ function ResponsiveWrapper({ children }: { children: React.ReactNode }) {
   const MIN_SCALE = 0.5
 
   useEffect(() => {
-    // Function to update the scale and offset based on window size
+    // Function to update the scale based on window size
     const updateScale = () => {
       const width = document.documentElement.clientWidth
       const height = document.documentElement.clientHeight
       const scaleX = width / BASE_WIDTH
       const scaleY = height / BASE_HEIGHT
       
-      // Use Math.max to ensure the content covers the screen, preventing black bars
+      // Use Math.max to ensure the content covers the screen, preventing background bleed
       const newScale = Math.max(MIN_SCALE, Math.max(scaleX, scaleY))
       setScale(newScale)
-
-      // Adjust vertical offset to keep the top navigation visible
-      const containerHeightOnScreen = BASE_HEIGHT * newScale
-      if (containerHeightOnScreen > height) {
-        const overflowAtTop = (containerHeightOnScreen - height) / 2
-        const navHeight = 60 * newScale // Approximate height of the top navigation bar
-        
-        if (overflowAtTop > 20 * newScale) {
-          const targetTop = 10 * newScale 
-          const currentTop = -overflowAtTop
-          const shiftNeeded = targetTop - currentTop
-          setVOffset(shiftNeeded / newScale)
-        } else {
-          setVOffset(0)
-        }
-      } else {
-        setVOffset(0)
-      }
     }
 
     // Initial scale update and event listeners for resize and orientation change
@@ -88,13 +69,15 @@ function ResponsiveWrapper({ children }: { children: React.ReactNode }) {
   }, [])
 
   return (
-    <div className="fixed inset-0 bg-[#2a2520] overflow-hidden flex items-center justify-center">
+    // items-start + transformOrigin "top center" anchors content to the top of the
+    // viewport so the dark-brown wrapper never bleeds through above the scene.
+    <div className="fixed inset-0 bg-[#2a2520] overflow-hidden flex items-start justify-center">
       <div
         style={{
           width: `${BASE_WIDTH}px`,
           height: `${BASE_HEIGHT}px`,
-          transform: `scale(${scale}) translateY(${vOffset}px)`,
-          transformOrigin: "center center",
+          transform: `scale(${scale})`,
+          transformOrigin: "top center",
           flexShrink: 0,
         }}
       >
