@@ -2442,4 +2442,4 @@ function AboutScene({ aboutData, playClick }: { aboutData: any, playClick: () =>
       </AnimatePresence>
     </motion.div>
   )
-}i
+}

@@ -63,8 +63,8 @@ export function PatrickBateman({ isAnimating }: PatrickBatemanProps) {
         <polygon points="50,70 60,85 50,85" fill="#f5f2e8" />
         <polygon points="70,70 60,85 70,85" fill="#f5f2e8" />
         
-        {/* Tie (behind suit, in front of shirt) */}
-        <rect x="57" y="80" width="6" height="30" fill="#4a3728" />
+        {/* Red tie (behind suit lapels, in front of shirt) */}
+        <rect x="57" y="80" width="6" height="30" fill="#8b0000" />
         
         {/* Suit lapels */}
         <polygon points="30,70 50,70 50,100 30,90" fill="#1a1815" />
