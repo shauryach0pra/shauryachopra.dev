@@ -618,7 +618,9 @@ function CardScene({ animationPhase, hasPlayedIntro, playClick }: { animationPha
                 <rect x="56" y="48" width="8" height="12" fill="#d4b8a0" />
                 <rect x="52" y="64" width="16" height="4" fill="#a06a5a" />
                 <rect x="50" y="72" width="20" height="10" fill="#e8d4b8" />
-                <rect x="24" y="80" width="72" height="90" fill="#1a1a1a" />
+                <rect x="24" y="80" width="72" height="50" fill="#1a1a1a" />
+                <rect x="24" y="130" width="32" height="40" fill="#1a1a1a" />
+                <rect x="64" y="130" width="32" height="40" fill="#1a1a1a" />
                 <polygon points="24,80 60,80 56,108 24,170" fill="#1a1a1a" />
                 <polygon points="96,80 60,80 64,108 96,170" fill="#1a1a1a" />
                 <polygon points="46,80 74,80 62,106 58,106" fill="#f5f2e8" />
