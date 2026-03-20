@@ -35,50 +35,77 @@ interface Project {
  * @returns {JSX.Element} The responsive wrapper component.
  */
 function ResponsiveWrapper({ children }: { children: React.ReactNode }) {
-  // State to hold the calculated scale
   const [scale, setScale] = useState(1)
-  
-  // Base dimensions for the portfolio layout
+
   const BASE_WIDTH = 1440
   const BASE_HEIGHT = 900
   const MIN_SCALE = 0.5
 
   useEffect(() => {
-    // Function to update the scale based on window size
     const updateScale = () => {
       const width = document.documentElement.clientWidth
-      const height = document.documentElement.clientHeight
-      const scaleX = width / BASE_WIDTH
-      const scaleY = height / BASE_HEIGHT
-      
-      // Use Math.max to ensure the content covers the screen, preventing background bleed
-      const newScale = Math.max(MIN_SCALE, Math.max(scaleX, scaleY))
+      // Always scale to fill full width — no side bars
+      const newScale = Math.max(MIN_SCALE, width / BASE_WIDTH)
       setScale(newScale)
     }
-
-    // Initial scale update and event listeners for resize and orientation change
     updateScale()
     window.addEventListener("resize", updateScale)
     window.addEventListener("orientationchange", updateScale)
-    
-    // Cleanup event listeners on component unmount
     return () => {
       window.removeEventListener("resize", updateScale)
       window.removeEventListener("orientationchange", updateScale)
     }
   }, [])
 
+  useEffect(() => {
+    // globals.css sets overflow:hidden on html/body — override so vertical scroll works
+    const html = document.documentElement
+    const body = document.body
+    const prevHtmlOverflow = html.style.overflow
+    const prevBodyOverflow = body.style.overflow
+    const prevHtmlHeight = html.style.height
+    const prevBodyHeight = body.style.height
+    html.style.overflow = "auto"
+    body.style.overflow = "auto"
+    html.style.height = "auto"
+    body.style.height = "auto"
+    return () => {
+      html.style.overflow = prevHtmlOverflow
+      body.style.overflow = prevBodyOverflow
+      html.style.height = prevHtmlHeight
+      body.style.height = prevBodyHeight
+    }
+  }, [])
+
+  // CSS transform:scale() doesn't affect layout flow, so the scroll container
+  // won't know the real height. A spacer div sized to the actual rendered
+  // height (BASE_HEIGHT * scale) gives the page the correct scroll height.
+  const renderedHeight = BASE_HEIGHT * scale
+
   return (
-    // items-start + transformOrigin "top center" anchors content to the top of the
-    // viewport so the dark-brown wrapper never bleeds through above the scene.
-    <div className="fixed inset-0 bg-[#2a2520] overflow-hidden flex items-start justify-center">
+    <div
+      style={{
+        width: "100%",
+        minHeight: `${renderedHeight}px`,
+        background: "var(--wall)",
+        position: "relative",
+        overflowX: "hidden",
+      }}
+    >
+      {/* Spacer that gives the page its true scrollable height */}
+      <div style={{ height: `${renderedHeight}px`, width: "100%" }} />
+
+      {/* Scaled scene pinned to the top */}
       <div
         style={{
+          position: "absolute",
+          top: 0,
+          left: "50%",
+          marginLeft: `-${BASE_WIDTH / 2}px`,
           width: `${BASE_WIDTH}px`,
           height: `${BASE_HEIGHT}px`,
           transform: `scale(${scale})`,
           transformOrigin: "top center",
-          flexShrink: 0,
         }}
       >
         {children}
