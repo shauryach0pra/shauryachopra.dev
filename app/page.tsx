@@ -619,11 +619,11 @@ function CardScene({ animationPhase, hasPlayedIntro, playClick }: { animationPha
                 <rect x="52" y="64" width="16" height="4" fill="#a06a5a" />
                 <rect x="50" y="72" width="20" height="10" fill="#e8d4b8" />
                 <rect x="24" y="80" width="72" height="90" fill="#1a1a1a" />
-                <polygon points="24,80 60,80 50,130 24,130" fill="#2a2a2a" />
-                <polygon points="96,80 60,80 70,130 96,130" fill="#2a2a2a" />
-                <rect x="48" y="80" width="24" height="36" fill="#f5f2e8" />
-                <rect x="55" y="84" width="10" height="40" fill="#8b0000" />
-                <polygon points="55,124 65,124 60,135" fill="#8b0000" />
+                <polygon points="24,80 60,80 56,108 24,170" fill="#1a1a1a" />
+                <polygon points="96,80 60,80 64,108 96,170" fill="#1a1a1a" />
+                <polygon points="46,80 74,80 62,106 58,106" fill="#f5f2e8" />
+                <rect x="57" y="84" width="6" height="22" fill="#8b0000" />
+                <polygon points="57,106 63,106 60,112" fill="#8b0000" />
                 <motion.g
                   animate={{ rotate: animationPhase === "throwing" ? -30 : 0 }}
                   transition={{ duration: 0.2 }}
@@ -2442,4 +2442,4 @@ function AboutScene({ aboutData, playClick }: { aboutData: any, playClick: () =>
       </AnimatePresence>
     </motion.div>
   )
-}
+}i
