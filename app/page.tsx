@@ -756,6 +756,14 @@ const ICE_CUBE_POSITIONS = [
   { x: 40, y: 110, isRight: false },  // Bottom center
 ]
 
+// Ice cube positions inside the martini glass bowl (in SVG viewBox coordinates)
+// Only 3 cubes: 6 (top-left), 7 (top-right), 8 (bottom-center)
+const MARTINI_ICE_CUBE_POSITIONS = [
+  { x: 26, y: 22, isRight: false },   // Cube 6 – top left  → popup on left
+  { x: 54, y: 22, isRight: true  },   // Cube 7 – top right → popup on right
+  { x: 40, y: 44, isRight: false },   // Cube 8 – bottom center → popup on left
+]
+
 // Placeholder project data for 5 ice cubes
 const PLACEHOLDER_PROJECTS = [
   { id: 1, name: "Fakebook", description: "Simulates an OTP grabbing attack using social engineering techniques", techStack: ["Resend API", "Next.js", "Typescript"], liveDemo: "https://shauryachopra.dev/fakebook" },
@@ -793,11 +801,31 @@ function ProjectsScene({
   const [hoveredCube, setHoveredCube] = useState<number | null>(null)
   const [selectedCubeIndex, setSelectedCubeIndex] = useState<number | null>(null)
 
-  // Handle clicking on an ice cube
+  // State for martini glass ice cubes (numbered 6–10)
+  const [martiniClickedCubes, setMartiniClickedCubes] = useState<Set<number>>(new Set())
+  const [martiniHoveredCube, setMartiniHoveredCube] = useState<number | null>(null)
+  const [martiniSelectedCubeIndex, setMartiniSelectedCubeIndex] = useState<number | null>(null)
+
+  // Handle clicking on a mojito ice cube — toggle popup, close martini popup
   const handleCubeClick = (index: number) => {
     playClick()
     setClickedCubes(prev => new Set(prev).add(index))
-    setSelectedCubeIndex(index)
+    setMartiniSelectedCubeIndex(null)
+    setSelectedCubeIndex(prev => (prev === index ? null : index))
+  }
+
+  // Handle clicking on a martini ice cube — toggle popup, close mojito popup
+  const handleMartiniCubeClick = (index: number) => {
+    playClick()
+    setMartiniClickedCubes(prev => new Set(prev).add(index))
+    setSelectedCubeIndex(null)
+    setMartiniSelectedCubeIndex(prev => (prev === index ? null : index))
+  }
+
+  // Close all popups (used by outside-click overlay)
+  const closeAllPopups = () => {
+    setSelectedCubeIndex(null)
+    setMartiniSelectedCubeIndex(null)
   }
 
   // Get the position for the project details popup
@@ -814,6 +842,19 @@ function ProjectsScene({
     }
   }
 
+  // Get the position for the martini "coming soon" popup — same left/right logic as mojito
+  const getMartiniPopupPosition = (cubeIndex: number) => {
+    const cube = MARTINI_ICE_CUBE_POSITIONS[cubeIndex]
+    const scaleY = 260 / 160
+    const cubeRelativeY = cube.y * scaleY
+    const popupOnLeft = !cube.isRight
+    return {
+      relativeX: popupOnLeft ? -380 : 160,
+      relativeY: cubeRelativeY - 100,
+      arrowPointsRight: popupOnLeft,
+    }
+  }
+
   // Render an ice cube SVG, with a cracked texture if it has been clicked
   const renderIceCube = (index: number, x: number, y: number, isClickable: boolean = true) => {
     const isClicked = clickedCubes.has(index)
@@ -825,25 +866,25 @@ function ProjectsScene({
         <g 
           key={index} 
           style={{ cursor: isClickable ? 'pointer' : 'default' }}
-          onClick={isClickable ? () => handleCubeClick(index) : undefined}
+          onClick={isClickable ? (e) => { e.stopPropagation(); handleCubeClick(index) } : undefined}
           onMouseEnter={isClickable ? () => setHoveredCube(index) : undefined}
           onMouseLeave={isClickable ? () => setHoveredCube(null) : undefined}
         >
           <polygon 
-            points={`${x-10},${y} ${x},${y-7} ${x+10},${y} ${x+10},${y+14} ${x},${y+21} ${x-10},${y+14}`} 
+            points={`${x-8},${y} ${x},${y-6} ${x+8},${y} ${x+8},${y+11} ${x},${y+17} ${x-8},${y+11}`} 
             fill={isHovered || isSelected ? "#b8e8f0" : "#d8f0f0"} 
             stroke={isHovered || isSelected ? "#60a0b0" : "#90b8c0"} 
-            strokeWidth="1.5" 
+            strokeWidth="1.2" 
           />
-          <polygon points={`${x-10},${y} ${x},${y-7} ${x},${y+7} ${x-10},${y+14}`} fill={isHovered || isSelected ? "#c8f0f8" : "#e8f8f8"} />
-          <polygon points={`${x},${y-7} ${x+10},${y} ${x+10},${y+14} ${x},${y+7}`} fill={isHovered || isSelected ? "#a0d8e8" : "#c8e8f0"} />
-          <polygon points={`${x-10},${y} ${x},${y-7} ${x+10},${y} ${x},${y+3}`} fill="#fff" opacity="0.7" />
-          <line x1={x-6} y1={y+2} x2={x-2} y2={y+8} stroke="#70a0b0" strokeWidth="1" />
-          <line x1={x-2} y1={y+8} x2={x+1} y2={y+5} stroke="#70a0b0" strokeWidth="1" />
-          <line x1={x+1} y1={y+5} x2={x+4} y2={y+12} stroke="#70a0b0" strokeWidth="1" />
-          <line x1={x-2} y1={y+8} x2={x-5} y2={y+13} stroke="#70a0b0" strokeWidth="0.8" />
-          <line x1={x+3} y1={y-2} x2={x+6} y2={y+4} stroke="#70a0b0" strokeWidth="0.8" />
-          <text x={x} y={y+12} textAnchor="middle" fill="#2a6a7a" fontSize="8" fontWeight="bold" fontFamily="monospace">{index + 1}</text>
+          <polygon points={`${x-8},${y} ${x},${y-6} ${x},${y+6} ${x-8},${y+11}`} fill={isHovered || isSelected ? "#c8f0f8" : "#e8f8f8"} />
+          <polygon points={`${x},${y-6} ${x+8},${y} ${x+8},${y+11} ${x},${y+6}`} fill={isHovered || isSelected ? "#a0d8e8" : "#c8e8f0"} />
+          <polygon points={`${x-8},${y} ${x},${y-6} ${x+8},${y} ${x},${y+2}`} fill="#fff" opacity="0.7" />
+          <line x1={x-5} y1={y+2} x2={x-2} y2={y+6} stroke="#70a0b0" strokeWidth="0.8" />
+          <line x1={x-2} y1={y+6} x2={x+1} y2={y+4} stroke="#70a0b0" strokeWidth="0.8" />
+          <line x1={x+1} y1={y+4} x2={x+3} y2={y+10} stroke="#70a0b0" strokeWidth="0.8" />
+          <line x1={x-2} y1={y+6} x2={x-4} y2={y+10} stroke="#70a0b0" strokeWidth="0.6" />
+          <line x1={x+2} y1={y-2} x2={x+5} y2={y+3} stroke="#70a0b0" strokeWidth="0.6" />
+          <text x={x} y={y+10} textAnchor="middle" fill="#2a6a7a" fontSize="7" fontWeight="bold" fontFamily="monospace">{index + 1}</text>
         </g>
       )
     }
@@ -852,21 +893,79 @@ function ProjectsScene({
       <g 
         key={index} 
         style={{ cursor: isClickable ? 'pointer' : 'default' }}
-        onClick={isClickable ? () => handleCubeClick(index) : undefined}
+        onClick={isClickable ? (e) => { e.stopPropagation(); handleCubeClick(index) } : undefined}
         onMouseEnter={isClickable ? () => setHoveredCube(index) : undefined}
         onMouseLeave={isClickable ? () => setHoveredCube(null) : undefined}
       >
         <polygon 
-          points={`${x-10},${y} ${x},${y-7} ${x+10},${y} ${x+10},${y+14} ${x},${y+21} ${x-10},${y+14}`} 
+          points={`${x-8},${y} ${x},${y-6} ${x+8},${y} ${x+8},${y+11} ${x},${y+17} ${x-8},${y+11}`} 
           fill={isHovered ? "#c8f0f8" : "#e8f8f8"} 
           stroke={isHovered ? "#70b8d0" : "#c0d8dc"} 
-          strokeWidth="1" 
+          strokeWidth="0.8" 
         />
-        <polygon points={`${x-10},${y} ${x},${y-7} ${x},${y+7} ${x-10},${y+14}`} fill={isHovered ? "#d8f4fc" : "#f4fcfc"} />
-        <polygon points={`${x},${y-7} ${x+10},${y} ${x+10},${y+14} ${x},${y+7}`} fill={isHovered ? "#b8e4f0" : "#dceef4"} />
-        <polygon points={`${x-10},${y} ${x},${y-7} ${x+10},${y} ${x},${y+3}`} fill="#fff" opacity="0.85" />
-        <polygon points={`${x-7},${y+2} ${x-3},${y-2} ${x-3},${y+6} ${x-7},${y+10}`} fill="#fff" opacity="0.5" />
-        <text x={x} y={y+12} textAnchor="middle" fill={isHovered ? "#0a4a5a" : "#2a6a7a"} fontSize="8" fontWeight="bold" fontFamily="monospace">{index + 1}</text>
+        <polygon points={`${x-8},${y} ${x},${y-6} ${x},${y+6} ${x-8},${y+11}`} fill={isHovered ? "#d8f4fc" : "#f4fcfc"} />
+        <polygon points={`${x},${y-6} ${x+8},${y} ${x+8},${y+11} ${x},${y+6}`} fill={isHovered ? "#b8e4f0" : "#dceef4"} />
+        <polygon points={`${x-8},${y} ${x},${y-6} ${x+8},${y} ${x},${y+2}`} fill="#fff" opacity="0.85" />
+        <polygon points={`${x-6},${y+2} ${x-2},${y-2} ${x-2},${y+5} ${x-6},${y+8}`} fill="#fff" opacity="0.5" />
+        <text x={x} y={y+10} textAnchor="middle" fill={isHovered ? "#0a4a5a" : "#2a6a7a"} fontSize="7" fontWeight="bold" fontFamily="monospace">{index + 1}</text>
+      </g>
+    )
+  }
+
+  // Render a martini ice cube (numbered 6–8) — same visual size as mojito cubes
+  const renderMartiniIceCube = (index: number, x: number, y: number) => {
+    const isClicked = martiniClickedCubes.has(index)
+    const isHovered = martiniHoveredCube === index
+    const isSelected = martiniSelectedCubeIndex === index
+    const displayNum = index + 6
+
+    if (isClicked) {
+      return (
+        <g
+          key={index}
+          style={{ cursor: 'pointer' }}
+          onClick={(e) => { e.stopPropagation(); handleMartiniCubeClick(index) }}
+          onMouseEnter={() => setMartiniHoveredCube(index)}
+          onMouseLeave={() => setMartiniHoveredCube(null)}
+        >
+          <polygon
+            points={`${x-8},${y} ${x},${y-6} ${x+8},${y} ${x+8},${y+11} ${x},${y+17} ${x-8},${y+11}`}
+            fill={isHovered || isSelected ? "#b8e8f0" : "#d8f0f0"}
+            stroke={isHovered || isSelected ? "#60a0b0" : "#90b8c0"}
+            strokeWidth="1.2"
+          />
+          <polygon points={`${x-8},${y} ${x},${y-6} ${x},${y+6} ${x-8},${y+11}`} fill={isHovered || isSelected ? "#c8f0f8" : "#e8f8f8"} />
+          <polygon points={`${x},${y-6} ${x+8},${y} ${x+8},${y+11} ${x},${y+6}`} fill={isHovered || isSelected ? "#a0d8e8" : "#c8e8f0"} />
+          <polygon points={`${x-8},${y} ${x},${y-6} ${x+8},${y} ${x},${y+2}`} fill="#fff" opacity="0.7" />
+          <line x1={x-5} y1={y+2} x2={x-2} y2={y+6} stroke="#70a0b0" strokeWidth="0.8" />
+          <line x1={x-2} y1={y+6} x2={x+1} y2={y+4} stroke="#70a0b0" strokeWidth="0.8" />
+          <line x1={x+1} y1={y+4} x2={x+3} y2={y+10} stroke="#70a0b0" strokeWidth="0.8" />
+          <line x1={x-2} y1={y+6} x2={x-4} y2={y+10} stroke="#70a0b0" strokeWidth="0.6" />
+          <line x1={x+2} y1={y-2} x2={x+5} y2={y+3} stroke="#70a0b0" strokeWidth="0.6" />
+          <text x={x} y={y+10} textAnchor="middle" fill="#2a6a7a" fontSize="7" fontWeight="bold" fontFamily="monospace">{displayNum}</text>
+        </g>
+      )
+    }
+
+    return (
+      <g
+        key={index}
+        style={{ cursor: 'pointer' }}
+        onClick={(e) => { e.stopPropagation(); handleMartiniCubeClick(index) }}
+        onMouseEnter={() => setMartiniHoveredCube(index)}
+        onMouseLeave={() => setMartiniHoveredCube(null)}
+      >
+        <polygon
+          points={`${x-8},${y} ${x},${y-6} ${x+8},${y} ${x+8},${y+11} ${x},${y+17} ${x-8},${y+11}`}
+          fill={isHovered ? "#c8f0f8" : "#e8f8f8"}
+          stroke={isHovered ? "#70b8d0" : "#c0d8dc"}
+          strokeWidth="0.8"
+        />
+        <polygon points={`${x-8},${y} ${x},${y-6} ${x},${y+6} ${x-8},${y+11}`} fill={isHovered ? "#d8f4fc" : "#f4fcfc"} />
+        <polygon points={`${x},${y-6} ${x+8},${y} ${x+8},${y+11} ${x},${y+6}`} fill={isHovered ? "#b8e4f0" : "#dceef4"} />
+        <polygon points={`${x-8},${y} ${x},${y-6} ${x+8},${y} ${x},${y+2}`} fill="#fff" opacity="0.85" />
+        <polygon points={`${x-6},${y+2} ${x-2},${y-2} ${x-2},${y+5} ${x-6},${y+8}`} fill="#fff" opacity="0.5" />
+        <text x={x} y={y+10} textAnchor="middle" fill={isHovered ? "#0a4a5a" : "#2a6a7a"} fontSize="7" fontWeight="bold" fontFamily="monospace">{displayNum}</text>
       </g>
     )
   }
@@ -881,6 +980,7 @@ function ProjectsScene({
       exit={{ opacity: 0 }}
       className="w-full h-full relative overflow-hidden"
       style={{ width: BASE_W, height: BASE_H }}
+      onClick={closeAllPopups}
     >
       {/* Background of the scene */}
       <div className="absolute inset-0" style={{ imageRendering: "pixelated" }}>
@@ -1114,11 +1214,15 @@ function ProjectsScene({
         </div>
       </div>
 
-      {/* Mojito glass with interactive ice cubes */}
+      {/* Mojito + Martini glasses – centered together */}
       <div
-        className="absolute z-10 left-1/2 -translate-x-1/2"
-        style={{ top: '410px' }}
+        className="absolute z-10"
+        style={{ top: '410px', left: '50%', transform: 'translateX(-50%)' }}
       >
+        <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+
+          {/* ── Mojito glass ── */}
+          <div style={{ position: 'relative' }}>
         <svg width="140" height="260" viewBox="0 0 80 150">
           <defs>
             <linearGradient id="mojitoLiquid" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -1151,18 +1255,62 @@ function ProjectsScene({
             </motion.g>
           ))}
           
-          <ellipse cx="26" cy="26" rx="9" ry="5" fill="#228b22" transform="rotate(-15 26 26)" />
-          <ellipse cx="40" cy="22" rx="11" ry="6" fill="#2e8b2e" transform="rotate(8 40 22)" />
-          <ellipse cx="56" cy="26" rx="8" ry="4" fill="#228b22" />
+          {/* Textured mint leaves */}
+          <g transform="rotate(-15 26 26)">
+            <ellipse cx="26" cy="26" rx="9" ry="5" fill="#228b22" />
+            <ellipse cx="26" cy="26" rx="7" ry="3.5" fill="#32a852" opacity="0.7" />
+            <line x1="20" y1="26" x2="32" y2="26" stroke="#1a5c1a" strokeWidth="0.8" opacity="0.6" />
+            <line x1="26" y1="23" x2="26" y2="29" stroke="#1a5c1a" strokeWidth="0.6" opacity="0.5" />
+            <line x1="22" y1="24" x2="24" y2="26" stroke="#1a5c1a" strokeWidth="0.4" opacity="0.4" />
+            <line x1="28" y1="24" x2="30" y2="26" stroke="#1a5c1a" strokeWidth="0.4" opacity="0.4" />
+          </g>
           
+          <g transform="rotate(8 40 22)">
+            <ellipse cx="40" cy="22" rx="11" ry="6" fill="#2e8b2e" />
+            <ellipse cx="40" cy="22" rx="9" ry="4.5" fill="#3cb73c" opacity="0.7" />
+            <line x1="33" y1="22" x2="47" y2="22" stroke="#1a5c1a" strokeWidth="0.8" opacity="0.6" />
+            <line x1="40" y1="18" x2="40" y2="26" stroke="#1a5c1a" strokeWidth="0.6" opacity="0.5" />
+            <line x1="35" y1="20" x2="37" y2="22" stroke="#1a5c1a" strokeWidth="0.4" opacity="0.4" />
+            <line x1="43" y1="20" x2="45" y2="22" stroke="#1a5c1a" strokeWidth="0.4" opacity="0.4" />
+          </g>
+          
+          <g transform="rotate(12 56 26)">
+            <ellipse cx="56" cy="26" rx="8" ry="4" fill="#228b22" />
+            <ellipse cx="56" cy="26" rx="6" ry="3" fill="#32a852" opacity="0.7" />
+            <line x1="51" y1="26" x2="61" y2="26" stroke="#1a5c1a" strokeWidth="0.8" opacity="0.6" />
+            <line x1="56" y1="23" x2="56" y2="29" stroke="#1a5c1a" strokeWidth="0.6" opacity="0.5" />
+            <line x1="53" y1="24" x2="55" y2="26" stroke="#1a5c1a" strokeWidth="0.4" opacity="0.4" />
+          </g>
+          
+          {/* Round lemon slice with yellow colors */}
           <g transform="translate(64, 18)">
-            <circle cx="0" cy="0" r="12" fill="#32cd32" stroke="#228b22" strokeWidth="2" />
-            <circle cx="0" cy="0" r="9" fill="#90EE90" />
-            <line x1="0" y1="-9" x2="0" y2="9" stroke="#228b22" strokeWidth="1" opacity="0.4" />
-            <line x1="-9" y1="0" x2="9" y2="0" stroke="#228b22" strokeWidth="1" opacity="0.4" />
-            <line x1="-6" y1="-6" x2="6" y2="6" stroke="#228b22" strokeWidth="1" opacity="0.4" />
-            <line x1="-6" y1="6" x2="6" y2="-6" stroke="#228b22" strokeWidth="1" opacity="0.4" />
-            <circle cx="0" cy="0" r="2" fill="#fff" opacity="0.6" />
+            {/* Outer rind */}
+            <circle cx="0" cy="0" r="12" fill="#fff59d" stroke="#f9a825" strokeWidth="1.5" />
+            {/* Inner pulp */}
+            <circle cx="0" cy="0" r="10" fill="#fff9c4" />
+            
+            {/* Lemon segments */}
+            <g opacity="0.8">
+              <path d="M 0,-10 L 2,-5 L 0,0 L -2,-5 Z" fill="#fff176" stroke="#f9a825" strokeWidth="0.3" />
+              <path d="M 0,0 L 2,5 L 0,10 L -2,5 Z" fill="#fff176" stroke="#f9a825" strokeWidth="0.3" />
+              <path d="M 0,0 L -5,2 L -10,0 L -5,-2 Z" fill="#fff176" stroke="#f9a825" strokeWidth="0.3" />
+              <path d="M 0,0 L 5,2 L 10,0 L 5,-2 Z" fill="#fff176" stroke="#f9a825" strokeWidth="0.3" />
+              <path d="M -3,-7 L -1,-3 L 0,0 L -2,-4 Z" fill="#ffeb3b" stroke="#f9a825" strokeWidth="0.3" />
+              <path d="M 3,-7 L 1,-3 L 0,0 L 2,-4 Z" fill="#ffeb3b" stroke="#f9a825" strokeWidth="0.3" />
+              <path d="M -3,7 L -1,3 L 0,0 L -2,4 Z" fill="#ffeb3b" stroke="#f9a825" strokeWidth="0.3" />
+              <path d="M 3,7 L 1,3 L 0,0 L 2,4 Z" fill="#ffeb3b" stroke="#f9a825" strokeWidth="0.3" />
+            </g>
+            
+            {/* Pulp dots */}
+            <circle cx="1" cy="-2" r="0.4" fill="#fff" opacity="0.8" />
+            <circle cx="-2" cy="1" r="0.3" fill="#fff" opacity="0.7" />
+            <circle cx="2" cy="3" r="0.3" fill="#fff" opacity="0.6" />
+            <circle cx="-1" cy="-4" r="0.3" fill="#fff" opacity="0.7" />
+            <circle cx="3" cy="1" r="0.2" fill="#fff" opacity="0.6" />
+            
+            {/* Center pulp */}
+            <circle cx="0" cy="0" r="2" fill="#fff59d" opacity="0.8" />
+            <circle cx="0" cy="0" r="1.5" fill="#fff9c4" />
           </g>
         </svg>
 
@@ -1175,6 +1323,7 @@ function ProjectsScene({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               className="absolute z-50"
+              onClick={(e) => e.stopPropagation()}
               style={{
                 left: getPopupPosition(selectedCubeIndex).relativeX,
                 top: getPopupPosition(selectedCubeIndex).relativeY,
@@ -1212,7 +1361,18 @@ function ProjectsScene({
                   }}
                 />
 
-                <div className="space-y-4">
+                {selectedCubeIndex >= PLACEHOLDER_PROJECTS.length ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-center py-12">
+                      <div className="text-center px-6">
+                        <div className="text-7xl mb-4">🚧</div>
+                        <p className="text-gray-800 font-bold text-xl mb-2">Coming Soon</p>
+                        <p className="text-gray-600 text-base">This project is under development</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
                     <h3 className="text-gray-900 font-bold text-2xl pr-8">
                       {PLACEHOLDER_PROJECTS[selectedCubeIndex]?.name || `Project ${selectedCubeIndex + 1}`}
                     </h3>
@@ -1254,10 +1414,134 @@ function ProjectsScene({
                       </a>
                     )}
                   </div>
+                )}
               </div>
             </motion.div>
           )}
         </AnimatePresence>
+          </div>{/* end mojito wrapper */}
+
+          {/* ── Martini glass ── */}
+          <div style={{ position: 'relative', marginTop: '50px' }}>
+            <svg width="140" height="224" viewBox="0 0 80 130">
+              <defs>
+                <linearGradient id="martiniLiquid" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#f8f6e8" stopOpacity="0.92" />
+                  <stop offset="40%" stopColor="#e8f0d0" stopOpacity="0.88" />
+                  <stop offset="100%" stopColor="#d4e8b8" stopOpacity="0.80" />
+                </linearGradient>
+                <clipPath id="martiniGlassClip">
+                  <polygon points="2,8 78,8 44,74 36,74" />
+                </clipPath>
+              </defs>
+
+              {/* 1. Liquid fill */}
+              <polygon points="2,8 78,8 44,74 36,74" fill="url(#martiniLiquid)" />
+
+              {/* 4. Bowl glass outline */}
+              <polygon points="2,8 78,8 44,74 36,74" fill="none" stroke="#fff" strokeWidth="2.5" opacity="0.7" />
+              {/* Left sheen */}
+              <polygon points="8,10 20,10 16,44" fill="#fff" opacity="0.12" />
+
+              {/* 5. Toothpick + olive — in front of glass, behind ice cubes */}
+              {/* Toothpick */}
+              <line x1="64" y1="2" x2="26" y2="16" stroke="#d4af37" strokeWidth="1.8" strokeLinecap="round" />
+              {/* Olive shadow */}
+              <ellipse cx="23" cy="18" rx="8" ry="7" fill="#1a3a18" opacity="0.25" />
+              {/* Olive body */}
+              <ellipse cx="22" cy="16" rx="8" ry="7" fill="#3d7a32" stroke="#244d1e" strokeWidth="1.2" />
+              {/* Olive highlight */}
+              <ellipse cx="19" cy="13" rx="3" ry="2.5" fill="#5db34f" opacity="0.75" />
+              {/* Pimento */}
+              <ellipse cx="22" cy="16" rx="3" ry="2.8" fill="#d93b2b" />
+              {/* Pimento highlight */}
+              <ellipse cx="21" cy="15" rx="1.2" ry="1" fill="#f07060" opacity="0.8" />
+              {/* Toothpick through olive */}
+              <line x1="30" y1="13" x2="15" y2="19" stroke="#d4af37" strokeWidth="1.4" strokeLinecap="round" opacity="0.7" />
+
+              {/* 6. Animated ice cubes — on top of everything */}
+              {MARTINI_ICE_CUBE_POSITIONS.map((pos, i) => (
+                <motion.g
+                  key={i}
+                  animate={{ y: [0, -3, 0, 2, 0] }}
+                  transition={{
+                    duration: 3 + i * 0.3,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: i * 0.4,
+                  }}
+                >
+                  {renderMartiniIceCube(i, pos.x, pos.y)}
+                </motion.g>
+              ))}
+
+              {/* Stem */}
+              <rect x="38.5" y="74" width="3" height="38" fill="#fff" opacity="0.6" />
+              {/* Base */}
+              <ellipse cx="40" cy="114" rx="22" ry="5" fill="#fff" opacity="0.5" />
+              <ellipse cx="40" cy="112" rx="16" ry="3" fill="#fff" opacity="0.2" />
+            </svg>
+
+            {/* Coming Soon popup — same glassmorphism shell as mojito */}
+            <AnimatePresence>
+              {martiniSelectedCubeIndex !== null && (
+                <motion.div
+                  key="martini-popup"
+                  initial={false}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="absolute z-50"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    left: getMartiniPopupPosition(martiniSelectedCubeIndex).relativeX,
+                    top: getMartiniPopupPosition(martiniSelectedCubeIndex).relativeY,
+                    width: '360px',
+                  }}
+                >
+                  <div
+                    className="relative rounded-2xl p-6 border border-white/60"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.55)',
+                      backdropFilter: 'blur(16px)',
+                      WebkitBackdropFilter: 'blur(16px)',
+                      boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255,255,255,0.7)',
+                    }}
+                  >
+                    {/* Arrow — same conditional logic as mojito */}
+                    <div
+                      className="absolute"
+                      style={{
+                        top: 80,
+                        ...(getMartiniPopupPosition(martiniSelectedCubeIndex).arrowPointsRight ? {
+                          right: '-16px', width: 0, height: 0,
+                          borderTop: '16px solid transparent',
+                          borderBottom: '16px solid transparent',
+                          borderLeft: '16px solid rgba(255, 255, 255, 0.55)',
+                        } : {
+                          left: '-16px', width: 0, height: 0,
+                          borderTop: '16px solid transparent',
+                          borderBottom: '16px solid transparent',
+                          borderRight: '16px solid rgba(255, 255, 255, 0.55)',
+                        })
+                      }}
+                    />
+                    {/* Always coming-soon since these are future projects */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-center py-12">
+                        <div className="text-center px-6">
+                          <div className="text-7xl mb-4">🚧</div>
+                          <p className="text-gray-800 font-bold text-xl mb-2">Coming Soon</p>
+                          <p className="text-gray-600 text-base">This project is under development</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>{/* end martini wrapper */}
+
+        </div>{/* end flex row */}
       </div>
     </motion.div>
   )
