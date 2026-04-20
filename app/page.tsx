@@ -768,7 +768,7 @@ const MARTINI_ICE_CUBE_POSITIONS = [
 const PLACEHOLDER_PROJECTS = [
   { id: 1, name: "Fakebook", description: "Simulates an OTP grabbing attack using social engineering techniques", techStack: ["Resend API", "Next.js", "Typescript"], liveDemo: "https://shauryachopra.dev/fakebook" },
   { id: 2, name: "KeyMatch", description: "A piano settings finder that recommends 3 presets for any song", techStack: ["Groq API", "HTML", "CSS"], liveDemo: "https://shauryachopra.dev/keymatch" },
-  { id: 3, name: "The Council", description: "Ask any question and get witty answers from 4 legendary figures who can be randomized", techStack: ["Groq API", "HTML", "CSS"], liveDemo: "https://shauryachopra.dev/thecouncil" },
+  { id: 3, name: "The Council", description: "Ask any question and get witty answers from 4 legendary figures who can be randomized", techStack: ["Groq API", "Tone.js", "Hugging Face Inference"], liveDemo: "https://shauryachopra.dev/thecouncil" },
   { id: 4, name: "WikiHole", description: "Generates a knowledge graph that let's you explore hidden connections of a topic or find unexpected paths bridging two worlds", techStack: ["Groq API", "Vanilla JS", "HTML"], liveDemo: "https://shauryachopra.dev/wikihole" },
   { id: 5, name: "Warzone", description: "A top down military shooter game where the player deploys to a continent and battles for territorial control", techStack: ["Web Audio API", "JS", "HTML"], liveDemo: "https://shauryachopra.dev/warzone" },
 ]
