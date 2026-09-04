@@ -764,13 +764,15 @@ const MARTINI_ICE_CUBE_POSITIONS = [
   { x: 40, y: 44, isRight: false },   // Cube 8 – bottom center → popup on left
 ]
 
-// Placeholder project data for 5 ice cubes
+// Placeholder project data for 7 ice cubes
 const PLACEHOLDER_PROJECTS = [
   { id: 1, name: "Fakebook", description: "Simulates an OTP grabbing attack using social engineering techniques", techStack: ["Resend API", "Next.js", "Typescript"], liveDemo: "https://shauryachopra.dev/fakebook" },
   { id: 2, name: "KeyMatch", description: "A piano settings finder that recommends 3 presets for any song", techStack: ["Groq API", "HTML", "CSS"], liveDemo: "https://shauryachopra.dev/keymatch" },
   { id: 3, name: "The Council", description: "Ask any question and get witty answers from 4 legendary figures who can be randomized", techStack: ["Groq API", "Tone.js", "Hugging Face Inference"], liveDemo: "https://shauryachopra.dev/thecouncil" },
   { id: 4, name: "WikiHole", description: "Generates a knowledge graph that let's you explore hidden connections of a topic or find unexpected paths bridging two worlds", techStack: ["Groq API", "Vanilla JS", "HTML"], liveDemo: "https://shauryachopra.dev/wikihole" },
   { id: 5, name: "Warzone", description: "A top down military shooter game where the player deploys to a continent and battles for territorial control", techStack: ["Web Audio API", "JS", "HTML"], liveDemo: "https://shauryachopra.dev/warzone" },
+  { id: 6, name: "Pre Crush Trajectory Mapping", description: "A multi-stage computer vision pipeline for crowd detection, tracking, and predictive density analysis to enable early detection of crowd crush risks.", techStack: ["OpenCV", "PyTorch", "YOLOv11", "NumPy", "SciPy"], liveDemo: "https://www.youtube.com/watch?v=k9_PfLIWqPE" },
+  { id: 7, name: "MindMap", description: "An AI-powered brainstorming tool that generates visual mind maps from text prompts", techStack: ["OpenAI API", "D3.js", "Next.js"], liveDemo: "https://shauryachopra.dev/mindmap" },
 ]
 
 /**
@@ -1525,16 +1527,61 @@ function ProjectsScene({
                         })
                       }}
                     />
-                    {/* Always coming-soon since these are future projects */}
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-center py-12">
-                        <div className="text-center px-6">
-                          <div className="text-7xl mb-4">🚧</div>
-                          <p className="text-gray-800 font-bold text-xl mb-2">Coming Soon</p>
-                          <p className="text-gray-600 text-base">This project is under development</p>
+                    {/* Show project info for cubes 6 and 7, coming soon for cube 8 */}
+                    {martiniSelectedCubeIndex === 2 ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-center py-12">
+                          <div className="text-center px-6">
+                            <div className="text-7xl mb-4">🚧</div>
+                            <p className="text-gray-800 font-bold text-xl mb-2">Coming Soon</p>
+                            <p className="text-gray-600 text-base">This project is under development</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <h3 className="text-gray-900 font-bold text-2xl pr-8">
+                          {PLACEHOLDER_PROJECTS[martiniSelectedCubeIndex + 5]?.name || `Project ${martiniSelectedCubeIndex + 6}`}
+                        </h3>
+                        <p className="text-gray-700 text-base leading-relaxed">
+                          {PLACEHOLDER_PROJECTS[martiniSelectedCubeIndex + 5]?.description || "Project description placeholder"}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {(PLACEHOLDER_PROJECTS[martiniSelectedCubeIndex + 5]?.techStack || ["Tech 1", "Tech 2"]).map((tech, i) => (
+                            <span 
+                              key={i}
+                              className="px-3 py-1 rounded-full text-sm font-medium bg-white/40 text-gray-800 border border-white/50"
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                        {PLACEHOLDER_PROJECTS[martiniSelectedCubeIndex + 5]?.liveDemo && (
+                          <a 
+                            href={PLACEHOLDER_PROJECTS[martiniSelectedCubeIndex + 5].liveDemo}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => playClick()}
+                            className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-xl text-white text-base font-semibold transition-all"
+                            style={{
+                              background: '#5FB85F',
+                              boxShadow: '0 4px 12px rgba(95, 184, 95, 0.35)',
+                            }}
+                            onMouseEnter={e => {
+                              e.currentTarget.style.background = '#7FD67F'
+                              e.currentTarget.style.boxShadow = '0 4px 16px rgba(127, 214, 127, 0.45)'
+                            }}
+                            onMouseLeave={e => {
+                              e.currentTarget.style.background = '#5FB85F'
+                              e.currentTarget.style.boxShadow = '0 4px 12px rgba(95, 184, 95, 0.35)'
+                            }}
+                          >
+                            <Monitor size={18} />
+                            View Live Demo
+                          </a>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               )}
