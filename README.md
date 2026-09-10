@@ -21,12 +21,6 @@ An interactive personal portfolio website featuring animated scenes, pixel-art a
 
 ---
 
-### Demo
-
-Live Demo: [https://shauryachopra.dev](https://shauryachopra.dev)
-
----
-
 ### Project Structure
 
 ```
