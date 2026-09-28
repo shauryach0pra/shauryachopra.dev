@@ -772,7 +772,7 @@ const PLACEHOLDER_PROJECTS = [
   { id: 4, name: "WikiHole", description: "Generates a knowledge graph that let's you explore hidden connections of a topic or find unexpected paths bridging two worlds", techStack: ["Groq API", "Vanilla JS", "HTML"], liveDemo: "https://shauryachopra.dev/wikihole" },
   { id: 5, name: "Warzone", description: "A top down military shooter game where the player deploys to a continent and battles for territorial control", techStack: ["Web Audio API", "JS", "HTML"], liveDemo: "https://shauryachopra.dev/warzone" },
   { id: 6, name: "Pre Crush Trajectory Mapping", description: "A multi-stage computer vision pipeline for crowd detection, tracking, and predictive density analysis to enable early detection of crowd crush risks.", techStack: ["OpenCV", "PyTorch", "YOLOv11", "NumPy", "SciPy"], liveDemo: "https://www.youtube.com/watch?v=k9_PfLIWqPE" },
-  { id: 7, name: "MindMap", description: "An AI-powered brainstorming tool that generates visual mind maps from text prompts", techStack: ["OpenAI API", "D3.js", "Next.js"], liveDemo: "https://shauryachopra.dev/mindmap" },
+  { id: 7, name: "Slick Trace", description: "It spots slicks in satellite radar images, replays how the oil would have drifted from each nearby ship's recorded route, and ranks the ships by how closely their drift matches the slick.", techStack: ["Python", "NumPy", "SciPy", "FastAPI", "React", "PyTorch"], liveDemo: "https://shauryachopra.dev/slicktrace" },
 ]
 
 /**
@@ -1329,7 +1329,7 @@ function ProjectsScene({
               style={{
                 left: getPopupPosition(selectedCubeIndex).relativeX,
                 top: getPopupPosition(selectedCubeIndex).relativeY,
-                width: '360px',
+                width: selectedCubeIndex === 5 ? '420px' : '360px',
               }}
             >
               <div 
@@ -1375,7 +1375,7 @@ function ProjectsScene({
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <h3 className="text-gray-900 font-bold text-2xl pr-8">
+                    <h3 className={`text-gray-900 font-bold pr-8 ${selectedCubeIndex === 5 ? 'text-xl whitespace-nowrap' : 'text-2xl'}`}>
                       {PLACEHOLDER_PROJECTS[selectedCubeIndex]?.name || `Project ${selectedCubeIndex + 1}`}
                     </h3>
                     <p className="text-gray-700 text-base leading-relaxed">
@@ -1497,7 +1497,7 @@ function ProjectsScene({
                   style={{
                     left: getMartiniPopupPosition(martiniSelectedCubeIndex).relativeX,
                     top: getMartiniPopupPosition(martiniSelectedCubeIndex).relativeY,
-                    width: '360px',
+                    width: martiniSelectedCubeIndex === 0 ? '420px' : '360px',
                   }}
                 >
                   <div
@@ -1540,7 +1540,7 @@ function ProjectsScene({
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        <h3 className="text-gray-900 font-bold text-2xl pr-8">
+                        <h3 className={`text-gray-900 font-bold pr-8 ${martiniSelectedCubeIndex === 0 ? 'text-xl whitespace-nowrap' : 'text-2xl'}`}>
                           {PLACEHOLDER_PROJECTS[martiniSelectedCubeIndex + 5]?.name || `Project ${martiniSelectedCubeIndex + 6}`}
                         </h3>
                         <p className="text-gray-700 text-base leading-relaxed">
