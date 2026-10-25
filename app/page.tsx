@@ -764,7 +764,16 @@ const MARTINI_ICE_CUBE_POSITIONS = [
   { x: 40, y: 44, isRight: false },   // Cube 8 – bottom center → popup on left
 ]
 
-// Placeholder project data for 7 ice cubes
+// Ice cube positions inside the pina colada hurricane glass (in SVG viewBox coordinates)
+// 4 cubes in 2x2 grid: 9 (top-left), 10 (top-right), 11 (bottom-left), 12 (bottom-right)
+const PINA_COLADA_ICE_CUBE_POSITIONS = [
+  { x: 28, y: 40, isRight: false },   // Cube 9 – top left  → popup on left
+  { x: 52, y: 40, isRight: true  },   // Cube 10 – top right → popup on right
+  { x: 28, y: 65, isRight: false },   // Cube 11 – bottom left → popup on left
+  { x: 52, y: 65, isRight: true  },   // Cube 12 – bottom right → popup on right
+]
+
+// Placeholder project data for 8 ice cubes
 const PLACEHOLDER_PROJECTS = [
   { id: 1, name: "Fakebook", description: "Simulates an OTP grabbing attack using social engineering techniques", techStack: ["Resend API", "Next.js", "Typescript"], liveDemo: "https://shauryachopra.dev/fakebook" },
   { id: 2, name: "KeyMatch", description: "A piano settings finder that recommends 3 presets for any song", techStack: ["Groq API", "HTML", "CSS"], liveDemo: "https://shauryachopra.dev/keymatch" },
@@ -773,6 +782,7 @@ const PLACEHOLDER_PROJECTS = [
   { id: 5, name: "Warzone", description: "A top down military shooter game where the player deploys to a continent and battles for territorial control", techStack: ["Web Audio API", "JS", "HTML"], liveDemo: "https://shauryachopra.dev/warzone" },
   { id: 6, name: "Pre Crush Trajectory Mapping", description: "A multi-stage computer vision pipeline for crowd detection, tracking, and predictive density analysis to enable early detection of crowd crush risks.", techStack: ["OpenCV", "PyTorch", "YOLOv11", "NumPy", "SciPy"], liveDemo: "https://www.youtube.com/watch?v=k9_PfLIWqPE" },
   { id: 7, name: "Slick Trace", description: "It spots slicks in satellite radar images, replays how the oil would have drifted from each nearby ship's recorded route, and ranks the ships by how closely their drift matches the slick.", techStack: ["Python", "NumPy", "SciPy", "FastAPI", "React", "PyTorch"], liveDemo: "https://shauryachopra.dev/slicktrace" },
+  { id: 8, name: "Dharmakshetra", description: "A game that tells the story of the Mahabharata and teaches lessons from the Bhagavad Gita along the way.", techStack: ["HTML", "CSS", "JavaScript"], liveDemo: "https://shauryachopra.dev/dharmakshetra" },
 ]
 
 /**
@@ -803,10 +813,15 @@ function ProjectsScene({
   const [hoveredCube, setHoveredCube] = useState<number | null>(null)
   const [selectedCubeIndex, setSelectedCubeIndex] = useState<number | null>(null)
 
-  // State for martini glass ice cubes (numbered 6–10)
+  // State for martini glass ice cubes (numbered 6–8)
   const [martiniClickedCubes, setMartiniClickedCubes] = useState<Set<number>>(new Set())
   const [martiniHoveredCube, setMartiniHoveredCube] = useState<number | null>(null)
   const [martiniSelectedCubeIndex, setMartiniSelectedCubeIndex] = useState<number | null>(null)
+
+  // State for pina colada glass ice cubes (numbered 9–11)
+  const [pinaColadaClickedCubes, setPinaColadaClickedCubes] = useState<Set<number>>(new Set())
+  const [pinaColadaHoveredCube, setPinaColadaHoveredCube] = useState<number | null>(null)
+  const [pinaColadaSelectedCubeIndex, setPinaColadaSelectedCubeIndex] = useState<number | null>(null)
 
   // Handle clicking on a mojito ice cube — toggle popup, close martini popup
   const handleCubeClick = (index: number) => {
@@ -821,13 +836,24 @@ function ProjectsScene({
     playClick()
     setMartiniClickedCubes(prev => new Set(prev).add(index))
     setSelectedCubeIndex(null)
+    setPinaColadaSelectedCubeIndex(null)
     setMartiniSelectedCubeIndex(prev => (prev === index ? null : index))
+  }
+
+  // Handle clicking on a pina colada ice cube — toggle popup, close other popups
+  const handlePinaColadaCubeClick = (index: number) => {
+    playClick()
+    setPinaColadaClickedCubes(prev => new Set(prev).add(index))
+    setSelectedCubeIndex(null)
+    setMartiniSelectedCubeIndex(null)
+    setPinaColadaSelectedCubeIndex(prev => (prev === index ? null : index))
   }
 
   // Close all popups (used by outside-click overlay)
   const closeAllPopups = () => {
     setSelectedCubeIndex(null)
     setMartiniSelectedCubeIndex(null)
+    setPinaColadaSelectedCubeIndex(null)
   }
 
   // Get the position for the project details popup
@@ -848,6 +874,19 @@ function ProjectsScene({
   const getMartiniPopupPosition = (cubeIndex: number) => {
     const cube = MARTINI_ICE_CUBE_POSITIONS[cubeIndex]
     const scaleY = 260 / 160
+    const cubeRelativeY = cube.y * scaleY
+    const popupOnLeft = !cube.isRight
+    return {
+      relativeX: popupOnLeft ? -380 : 160,
+      relativeY: cubeRelativeY - 100,
+      arrowPointsRight: popupOnLeft,
+    }
+  }
+
+  // Get the position for the pina colada popup — same left/right logic as mojito
+  const getPinaColadaPopupPosition = (cubeIndex: number) => {
+    const cube = PINA_COLADA_ICE_CUBE_POSITIONS[cubeIndex]
+    const scaleY = 260 / 150
     const cubeRelativeY = cube.y * scaleY
     const popupOnLeft = !cube.isRight
     return {
@@ -956,6 +995,64 @@ function ProjectsScene({
         onClick={(e) => { e.stopPropagation(); handleMartiniCubeClick(index) }}
         onMouseEnter={() => setMartiniHoveredCube(index)}
         onMouseLeave={() => setMartiniHoveredCube(null)}
+      >
+        <polygon
+          points={`${x-8},${y} ${x},${y-6} ${x+8},${y} ${x+8},${y+11} ${x},${y+17} ${x-8},${y+11}`}
+          fill={isHovered ? "#c8f0f8" : "#e8f8f8"}
+          stroke={isHovered ? "#70b8d0" : "#c0d8dc"}
+          strokeWidth="0.8"
+        />
+        <polygon points={`${x-8},${y} ${x},${y-6} ${x},${y+6} ${x-8},${y+11}`} fill={isHovered ? "#d8f4fc" : "#f4fcfc"} />
+        <polygon points={`${x},${y-6} ${x+8},${y} ${x+8},${y+11} ${x},${y+6}`} fill={isHovered ? "#b8e4f0" : "#dceef4"} />
+        <polygon points={`${x-8},${y} ${x},${y-6} ${x+8},${y} ${x},${y+2}`} fill="#fff" opacity="0.85" />
+        <polygon points={`${x-6},${y+2} ${x-2},${y-2} ${x-2},${y+5} ${x-6},${y+8}`} fill="#fff" opacity="0.5" />
+        <text x={x} y={y+10} textAnchor="middle" fill={isHovered ? "#0a4a5a" : "#2a6a7a"} fontSize="7" fontWeight="bold" fontFamily="monospace">{displayNum}</text>
+      </g>
+    )
+  }
+
+  // Render a pina colada ice cube (numbered 9–11) — same visual size as mojito cubes
+  const renderPinaColadaIceCube = (index: number, x: number, y: number) => {
+    const isClicked = pinaColadaClickedCubes.has(index)
+    const isHovered = pinaColadaHoveredCube === index
+    const isSelected = pinaColadaSelectedCubeIndex === index
+    const displayNum = index + 9
+
+    if (isClicked) {
+      return (
+        <g
+          key={index}
+          style={{ cursor: 'pointer' }}
+          onClick={(e) => { e.stopPropagation(); handlePinaColadaCubeClick(index) }}
+          onMouseEnter={() => setPinaColadaHoveredCube(index)}
+          onMouseLeave={() => setPinaColadaHoveredCube(null)}
+        >
+          <polygon
+            points={`${x-8},${y} ${x},${y-6} ${x+8},${y} ${x+8},${y+11} ${x},${y+17} ${x-8},${y+11}`}
+            fill={isHovered || isSelected ? "#b8e8f0" : "#d8f0f0"}
+            stroke={isHovered || isSelected ? "#60a0b0" : "#90b8c0"}
+            strokeWidth="1.2"
+          />
+          <polygon points={`${x-8},${y} ${x},${y-6} ${x},${y+6} ${x-8},${y+11}`} fill={isHovered || isSelected ? "#c8f0f8" : "#e8f8f8"} />
+          <polygon points={`${x},${y-6} ${x+8},${y} ${x+8},${y+11} ${x},${y+6}`} fill={isHovered || isSelected ? "#a0d8e8" : "#c8e8f0"} />
+          <polygon points={`${x-8},${y} ${x},${y-6} ${x+8},${y} ${x},${y+2}`} fill="#fff" opacity="0.7" />
+          <line x1={x-5} y1={y+2} x2={x-2} y2={y+6} stroke="#70a0b0" strokeWidth="0.8" />
+          <line x1={x-2} y1={y+6} x2={x+1} y2={y+4} stroke="#70a0b0" strokeWidth="0.8" />
+          <line x1={x+1} y1={y+4} x2={x+3} y2={y+10} stroke="#70a0b0" strokeWidth="0.8" />
+          <line x1={x-2} y1={y+6} x2={x-4} y2={y+10} stroke="#70a0b0" strokeWidth="0.6" />
+          <line x1={x+2} y1={y-2} x2={x+5} y2={y+3} stroke="#70a0b0" strokeWidth="0.6" />
+          <text x={x} y={y+10} textAnchor="middle" fill="#2a6a7a" fontSize="7" fontWeight="bold" fontFamily="monospace">{displayNum}</text>
+        </g>
+      )
+    }
+
+    return (
+      <g
+        key={index}
+        style={{ cursor: 'pointer' }}
+        onClick={(e) => { e.stopPropagation(); handlePinaColadaCubeClick(index) }}
+        onMouseEnter={() => setPinaColadaHoveredCube(index)}
+        onMouseLeave={() => setPinaColadaHoveredCube(null)}
       >
         <polygon
           points={`${x-8},${y} ${x},${y-6} ${x+8},${y} ${x+8},${y+11} ${x},${y+17} ${x-8},${y+11}`}
@@ -1527,66 +1624,224 @@ function ProjectsScene({
                         })
                       }}
                     />
-                    {/* Show project info for cubes 6 and 7, coming soon for cube 8 */}
-                    {martiniSelectedCubeIndex === 2 ? (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-center py-12">
-                          <div className="text-center px-6">
-                            <div className="text-7xl mb-4">🚧</div>
-                            <p className="text-gray-800 font-bold text-xl mb-2">Coming Soon</p>
-                            <p className="text-gray-600 text-base">This project is under development</p>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <h3 className={`text-gray-900 font-bold pr-8 ${martiniSelectedCubeIndex === 0 ? 'text-xl whitespace-nowrap' : 'text-2xl'}`}>
-                          {PLACEHOLDER_PROJECTS[martiniSelectedCubeIndex + 5]?.name || `Project ${martiniSelectedCubeIndex + 6}`}
-                        </h3>
-                        <p className="text-gray-700 text-base leading-relaxed">
-                          {PLACEHOLDER_PROJECTS[martiniSelectedCubeIndex + 5]?.description || "Project description placeholder"}
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {(PLACEHOLDER_PROJECTS[martiniSelectedCubeIndex + 5]?.techStack || ["Tech 1", "Tech 2"]).map((tech, i) => (
-                            <span 
-                              key={i}
-                              className="px-3 py-1 rounded-full text-sm font-medium bg-white/40 text-gray-800 border border-white/50"
-                            >
-                              {tech}
-                            </span>
-                          ))}
-                        </div>
-                        {PLACEHOLDER_PROJECTS[martiniSelectedCubeIndex + 5]?.liveDemo && (
-                          <a 
-                            href={PLACEHOLDER_PROJECTS[martiniSelectedCubeIndex + 5].liveDemo}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={() => playClick()}
-                            className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-xl text-white text-base font-semibold transition-all"
-                            style={{
-                              background: '#5FB85F',
-                              boxShadow: '0 4px 12px rgba(95, 184, 95, 0.35)',
-                            }}
-                            onMouseEnter={e => {
-                              e.currentTarget.style.background = '#7FD67F'
-                              e.currentTarget.style.boxShadow = '0 4px 16px rgba(127, 214, 127, 0.45)'
-                            }}
-                            onMouseLeave={e => {
-                              e.currentTarget.style.background = '#5FB85F'
-                              e.currentTarget.style.boxShadow = '0 4px 12px rgba(95, 184, 95, 0.35)'
-                            }}
+                    {/* Show project info for all martini cubes */}
+                    <div className="space-y-4">
+                      <h3 className={`text-gray-900 font-bold pr-8 ${martiniSelectedCubeIndex === 0 ? 'text-xl whitespace-nowrap' : 'text-2xl'}`}>
+                        {PLACEHOLDER_PROJECTS[martiniSelectedCubeIndex + 5]?.name || `Project ${martiniSelectedCubeIndex + 6}`}
+                      </h3>
+                      <p className="text-gray-700 text-base leading-relaxed">
+                        {PLACEHOLDER_PROJECTS[martiniSelectedCubeIndex + 5]?.description || "Project description placeholder"}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {(PLACEHOLDER_PROJECTS[martiniSelectedCubeIndex + 5]?.techStack || ["Tech 1", "Tech 2"]).map((tech, i) => (
+                          <span
+                            key={i}
+                            className="px-3 py-1 rounded-full text-sm font-medium bg-white/40 text-gray-800 border border-white/50"
                           >
-                            <Monitor size={18} />
-                            View Live Demo
-                          </a>
-                        )}
+                            {tech}
+                          </span>
+                        ))}
                       </div>
-                    )}
+                      {PLACEHOLDER_PROJECTS[martiniSelectedCubeIndex + 5]?.liveDemo && (
+                        <a
+                          href={PLACEHOLDER_PROJECTS[martiniSelectedCubeIndex + 5].liveDemo}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => playClick()}
+                          className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-xl text-white text-base font-semibold transition-all"
+                          style={{
+                            background: '#5FB85F',
+                            boxShadow: '0 4px 12px rgba(95, 184, 95, 0.35)',
+                          }}
+                          onMouseEnter={e => {
+                            e.currentTarget.style.background = '#7FD67F'
+                            e.currentTarget.style.boxShadow = '0 4px 16px rgba(127, 214, 127, 0.45)'
+                          }}
+                          onMouseLeave={e => {
+                            e.currentTarget.style.background = '#5FB85F'
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(95, 184, 95, 0.35)'
+                          }}
+                        >
+                          <Monitor size={18} />
+                          View Live Demo
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>{/* end martini wrapper */}
+
+          {/* ── Pina Colada glass ── */}
+          <div style={{ position: 'relative', marginTop: '16px' }}>
+            <svg width="140" height="260" viewBox="0 0 80 150" style={{ overflow: 'visible' }}>
+              <defs>
+                {/* Opaque lemon-cream so the drink doesn't blend into the sand */}
+                <linearGradient id="pinaColadaLiquid" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#fffbd6" stopOpacity="1" />
+                  <stop offset="45%" stopColor="#fff48a" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#ffe45c" stopOpacity="1" />
+                </linearGradient>
+                <linearGradient id="pinaColadaEdge" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#e8a800" stopOpacity="0.28" />
+                  <stop offset="18%" stopColor="#e8a800" stopOpacity="0" />
+                  <stop offset="82%" stopColor="#e8a800" stopOpacity="0" />
+                  <stop offset="100%" stopColor="#e8a800" stopOpacity="0.28" />
+                </linearGradient>
+                <clipPath id="pinaColadaGlassClip">
+                  <path d="M18,5 C14,16 10,30 10,46 C10,66 24,80 33,90 C36,93 37,96 37,99 L43,99 C43,96 44,93 47,90 C56,80 70,66 70,46 C70,30 66,16 62,5 Z" />
+                </clipPath>
+                <clipPath id="pinaUmbrellaClip">
+                  <path d="M-13,2 Q-13,-12 0,-14 Q13,-12 13,2 Q9.5,-1 6.5,2 Q3.3,-1 0,2 Q-3.3,-1 -6.5,2 Q-9.5,-1 -13,2 Z" />
+                </clipPath>
+              </defs>
+
+              {/* Whole glass is drawn slightly smaller (0.88) around its base; ice cubes stay full size */}
+              <g transform="translate(40 138.5) scale(0.88) translate(-40 -138.5)">
+
+                {/* 1. Faint glass body */}
+                <path d="M18,5 C14,16 10,30 10,46 C10,66 24,80 33,90 C36,93 37,96 37,99 L43,99 C43,96 44,93 47,90 C56,80 70,66 70,46 C70,30 66,16 62,5 Z" fill="#fff" opacity="0.3" />
+
+                {/* 2. Drink */}
+                <g clipPath="url(#pinaColadaGlassClip)">
+                  <rect x="0" y="5" width="80" height="96" fill="url(#pinaColadaLiquid)" />
+                  <rect x="0" y="5" width="80" height="96" fill="url(#pinaColadaEdge)" />
+                  <circle cx="22" cy="50" r="1.1" fill="#fff" opacity="0.55" />
+                  <circle cx="58" cy="48" r="0.9" fill="#fff" opacity="0.5" />
+                  <circle cx="50" cy="26" r="0.8" fill="#fff" opacity="0.55" />
+                  <circle cx="38" cy="84" r="0.9" fill="#fff" opacity="0.45" />
+                </g>
+
+                {/* 3. Black straw — goes down into the drink (behind ice cubes) */}
+                <line x1="50.7" y1="-24" x2="33" y2="78" stroke="#1c1c1c" strokeWidth="3.4" strokeLinecap="round" />
+                <line x1="49.6" y1="-24" x2="31.9" y2="78" stroke="#5a5a5a" strokeWidth="0.9" strokeLinecap="round" opacity="0.8" />
+
+                {/* 4. Umbrella pick — pushed down into the drink */}
+                <line x1="53" y1="24" x2="59" y2="-4" stroke="#d4af37" strokeWidth="1.1" strokeLinecap="round" />
+
+                {/* 5. Thin froth line at the top of the drink */}
+                <g clipPath="url(#pinaColadaGlassClip)">
+                  <ellipse cx="40" cy="5.5" rx="23" ry="2" fill="#fffef0" opacity="0.9" />
+                </g>
+
+                {/* 6. Glass outline (same white stroke as martini) + sheen */}
+                <path d="M18,5 C14,16 10,30 10,46 C10,66 24,80 33,90 C36,93 37,96 37,99 L43,99 C43,96 44,93 47,90 C56,80 70,66 70,46 C70,30 66,16 62,5 Z" fill="none" stroke="#fff" strokeWidth="2.5" opacity="0.75" strokeLinejoin="round" />
+                <path d="M15,22 C12,32 12,46 14,58" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" opacity="0.5" />
+                <path d="M65,26 C67,36 67,48 66,58" fill="none" stroke="#fff" strokeWidth="1.2" strokeLinecap="round" opacity="0.28" />
+
+                {/* 7. Smooth stem flaring into the foot */}
+                <path d="M37,99 L43,99 C43,112 42,121 51,131 L29,131 C38,121 37,112 37,99 Z" fill="#fff" opacity="0.55" />
+                <ellipse cx="40" cy="134" rx="21" ry="4.5" fill="#fff" opacity="0.5" />
+                <ellipse cx="40" cy="132" rx="14" ry="2.8" fill="#fff" opacity="0.2" />
+
+                {/* 8. Pineapple wedge leaning on the left rim, curved skin on top */}
+                <g>
+                  <path d="M-9,6 Q5,-7 19,-10 L14,18 Z" fill="#ffe074" stroke="#d9a21b" strokeWidth="0.9" strokeLinejoin="round" />
+                  <path d="M-7.2,8.8 Q5,-3.8 17.4,-6.8 L14,15 Z" fill="#ffeb9a" opacity="0.7" />
+                  <line x1="14" y1="18" x2="0.5" y2="4.2" stroke="#e0a91c" strokeWidth="0.5" opacity="0.7" />
+                  <line x1="14" y1="18" x2="6.8" y2="0.0" stroke="#e0a91c" strokeWidth="0.5" opacity="0.7" />
+                  <line x1="14" y1="18" x2="13.1" y2="-3.0" stroke="#e0a91c" strokeWidth="0.5" opacity="0.7" />
+                  <path d="M-9,6 Q5,-7 19,-10" fill="none" stroke="#5b7f2a" strokeWidth="2.6" strokeLinecap="round" />
+                  <path d="M-8.6,7.9 Q5,-5.1 18.6,-8.1" fill="none" stroke="#a8782a" strokeWidth="0.8" opacity="0.85" />
+                  <circle cx="-1.7" cy="2.9" r="0.6" fill="#7a5214" opacity="0.85" />
+                  <circle cx="5.9" cy="-2.2" r="0.6" fill="#7a5214" opacity="0.85" />
+                  <circle cx="13.5" cy="-5.8" r="0.6" fill="#7a5214" opacity="0.85" />
+                </g>
+
+                {/* 9. Cherry resting on the rim, in front of the wedge */}
+                <ellipse cx="22" cy="1.3" rx="4.6" ry="4.3" fill="#8f0e26" opacity="0.28" />
+                <circle cx="21" cy="0.5" r="4.6" fill="#d6142f" stroke="#8f0e26" strokeWidth="0.9" />
+                <circle cx="19.3" cy="-1.3" r="1.4" fill="#ff8a8a" opacity="0.85" />
+                <path d="M21,-3.9 Q19.5,-8 16.5,-12" fill="none" stroke="#7a3d12" strokeWidth="1" strokeLinecap="round" />
+
+                {/* 10. Small umbrella canopy sitting on the pick */}
+                <g transform="translate(59,-4) rotate(14) scale(0.55)">
+                  <path d="M-13,2 Q-13,-12 0,-14 Q13,-12 13,2 Q9.5,-1 6.5,2 Q3.3,-1 0,2 Q-3.3,-1 -6.5,2 Q-9.5,-1 -13,2 Z" fill="#ff6fa8" />
+                  <g clipPath="url(#pinaUmbrellaClip)">
+                    <polygon points="0,-14 -6.5,3 0,3" fill="#fff4f8" />
+                    <polygon points="0,-14 6.5,3 13,3" fill="#fff4f8" />
+                  </g>
+                  <path d="M-13,2 Q-13,-12 0,-14 Q13,-12 13,2 Q9.5,-1 6.5,2 Q3.3,-1 0,2 Q-3.3,-1 -6.5,2 Q-9.5,-1 -13,2 Z" fill="none" stroke="#d6408f" strokeWidth="1.2" />
+                  <circle cx="0" cy="-14.6" r="1.5" fill="#d4af37" />
+                </g>
+              </g>
+
+              {/* Animated ice cubes — same size/behaviour as the other glasses */}
+              {PINA_COLADA_ICE_CUBE_POSITIONS.map((pos, i) => (
+                <motion.g
+                  key={i}
+                  animate={{ y: [0, -3, 0, 2, 0] }}
+                  transition={{
+                    duration: 3 + i * 0.3,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: i * 0.4,
+                  }}
+                >
+                  {renderPinaColadaIceCube(i, pos.x, pos.y)}
+                </motion.g>
+              ))}
+            </svg>
+
+            {/* Coming Soon popup — same glassmorphism shell as mojito */}
+            <AnimatePresence>
+              {pinaColadaSelectedCubeIndex !== null && (
+                <motion.div
+                  key="pina-colada-popup"
+                  initial={false}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="absolute z-50"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    left: getPinaColadaPopupPosition(pinaColadaSelectedCubeIndex).relativeX,
+                    top: getPinaColadaPopupPosition(pinaColadaSelectedCubeIndex).relativeY,
+                    width: '360px',
+                  }}
+                >
+                  <div
+                    className="relative rounded-2xl p-6 border border-white/60"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.55)',
+                      backdropFilter: 'blur(16px)',
+                      WebkitBackdropFilter: 'blur(16px)',
+                      boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255,255,255,0.7)',
+                    }}
+                  >
+                    {/* Arrow — same conditional logic as mojito */}
+                    <div
+                      className="absolute"
+                      style={{
+                        top: 100,
+                        ...(getPinaColadaPopupPosition(pinaColadaSelectedCubeIndex).arrowPointsRight ? {
+                          right: '-16px', width: 0, height: 0,
+                          borderTop: '16px solid transparent',
+                          borderBottom: '16px solid transparent',
+                          borderLeft: '16px solid rgba(255, 255, 255, 0.55)',
+                        } : {
+                          left: '-16px', width: 0, height: 0,
+                          borderTop: '16px solid transparent',
+                          borderBottom: '16px solid transparent',
+                          borderRight: '16px solid rgba(255, 255, 255, 0.55)',
+                        })
+                      }}
+                    />
+                    {/* Show coming soon for all pina colada cubes */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-center py-12">
+                        <div className="text-center px-6">
+                          <div className="text-7xl mb-4">🚧</div>
+                          <p className="text-gray-800 font-bold text-xl mb-2">Coming Soon</p>
+                          <p className="text-gray-600 text-base">This project is under development</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>{/* end pina colada wrapper */}
 
         </div>{/* end flex row */}
       </div>
